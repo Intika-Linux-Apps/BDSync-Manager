@@ -27,12 +27,12 @@ import logging
 import os
 import re
 import shlex
-import subprocess
 import tempfile
 import time
 
+import plumbum
+
 LVM_SIZE_REGEX = re.compile(r"^[0-9]+[bBsSkKmMgGtTpPeE]?$")
-TERMINAL_ENCODING = "utf-8"
 BDSYNC_REMOTE_TARGET_MISSING_REGEX = re.compile(r"^get_rd_queue: EOF 6$", flags=re.MULTILINE)
 
 
@@ -84,16 +84,9 @@ def validate_settings(settings):
 def get_remote_tempfile(connection_command, target, directory):
     cmd_args = shlex.split(connection_command)
     cmd_args.append("mktemp --tmpdir=%s %s-XXXX.bdsync" % (shlex.quote(directory), shlex.quote(os.path.basename(target))))
-    try:
-        output = subprocess.check_output(cmd_args)
-    except subprocess.CalledProcessError as exc:
-        raise TaskProcessingError("Failed to generate remote temporary file: %s" % str(exc))
+    output = plumbum.local[cmd_args[0]](cmd_args[1:])
     # remove linebreaks from result
-    return output.decode(TERMINAL_ENCODING).rstrip("\n\r")
-
-
-def _get_pipe_output(pipe):
-    return pipe.read().decode(pipe.encoding)
+    return output.rstrip("\n\r")
 
 
 def sizeof_fmt(num, suffix='B'):
@@ -106,6 +99,7 @@ def sizeof_fmt(num, suffix='B'):
 
 
 def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsync, remote_bdsync, bdsync_args):
+    log.info("Creating binary patch")
     if connection_command:
         # prepend the connection command
         remote_command = "%s %s --server" % (connection_command, shlex.quote(remote_bdsync))
@@ -113,16 +107,17 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
         log.debug("Using remote temporary patch file: %s" % str(remote_patch_file))
         output_command_args = shlex.split(connection_command)
         output_command_args.append("cat > %s" % shlex.quote(remote_patch_file))
-        log.debug("Starting remote patch transfer: %s" % str(output_command_args))
-        try:
-            output_process = subprocess.Popen(output_command_args, stdin=subprocess.PIPE,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        except OSError as exc:
-            raise TaskProcessingError("Failed to store remote patch file: %s" % str(exc))
+        log.debug("Using remote patch transfer: %s" % str(output_command_args))
+        output_command = plumbum.local[output_command_args[0]][tuple(output_command_args[1:])]
+        patch_size_command = shlex.split(connection_command)
+        # "stat --format %s" returns the size of the file in bytes
+        patch_size_command.append("stat --format %%s %s" % shlex.quote(remote_patch_file))
+        patch_size_func = plumbum.local[patch_size_command[0]][tuple(patch_size_command[1:])]
     else:
         remote_command = "%s --server" % shlex.quote(remote_bdsync)
         local_patch_file = tempfile.NamedTemporaryFile(dir=target_patch_dir, delete=False)
-        output_process = None
+        patch_size_func = lambda: os.path.getsize(local_patch_file.name)
+        output_command = None
     # run bdsync and handle the resulting states
     args = []
     args.append(local_bdsync)
@@ -131,62 +126,41 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
     args.append(remote_command)
     args.append(source)
     args.append(target)
+    patch_source = plumbum.local[args[0]][args[1:]]
     patch_create_start_time = time.time()
+    if connection_command:
+        chain = patch_source | output_command
+    else:
+        chain = patch_source > local_patch_file
     log.debug("Starting local bdsync process: %s" % str(args))
-    try:
-        if connection_command:
-            bdsync = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=output_process.stdin, stderr=subprocess.PIPE)
-        else:
-            bdsync = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except OSError as exc:
-        raise TaskProcessingError("Failed to start bdsync: %s" % str(exc))
-    if connection_command and (output_process.wait() != 0):
-        raise TaskProcessingError("Failed to transfer the patch file (exitcode=%d): %s" % \
-                (output_process.returncode, _get_pipe_output(output_process.stderr)))
-    if bdsync.wait() != 0:
-        if (bdsync.returncode == 1) and BDSYNC_REMOTE_TARGET_MISSING_REGEX.search(error_output):
-            raise TaskProcessingError("The target (%s) is missing: please copy it manually first" % target)
-        else:
-            raise TaskProcessingError("bdsync failed (exitcode=%d): %s" % (bdsync.returncode, _get_pipe_output(bdsync.stderr)))
+    chain()
     patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
-    log.info("bdsync successfully created and transferred a binary patch")
-    if not connection_command:
-        log.info("Patch Size: %s" % sizeof_fmt(os.path.getsize(local_patch_file.name)))
+    log.debug("bdsync successfully created and transferred a binary patch")
     log.info("Patch Create Time: %s" % patch_create_time)
+    log.info("Patch Size: %s" % sizeof_fmt(int(patch_size_func())))
     patch_apply_start_time = time.time()
     # everything went fine - now the patch should be applied
     if connection_command:
         patch_source = None
         bdsync_args = shlex.split(connection_command)
         bdsync_args.append("%s --patch < %s" % (shlex.quote(remote_bdsync), shlex.quote(remote_patch_file)))
+        apply_patch = plumbum.local[bdsync_args[0]][tuple(bdsync_args[1:])]
     else:
         local_patch_file.seek(0)
         patch_source = local_patch_file
-        bdsync_args = [local_bdsync, "--patch"]
-    log.info("Applying the patch")
-    log.debug("bdsync patch arguments: %s" % str(bdsync_args))
-    try:
-        bdsync = subprocess.Popen(bdsync_args, stdin=patch_source, stderr=subprocess.PIPE)
-    except OSError as exc:
-        raise TaskProcessingError("Failed to run bdsync patch process: %s" % str(exc))
-    if bdsync.wait() != 0:
-        raise TaskProcessingError("Failed to patch target (exitcode=%d): %s" % \
-                (bdsync.returncode, _get_pipe_output(bdsync.stderr)))
+        apply_patch = plumbum.local[local_bdsync]["--patch"]
+    log.debug("Applying the patch")
+    log.debug("bdsync patching: %s" % str(apply_patch))
+    apply_patch()
     patch_apply_time = datetime.timedelta(seconds=(time.time() - patch_apply_start_time))
-    log.info("Successfully applied the patch")
+    log.debug("Successfully applied the patch")
     log.info("Patch Apply Time: %s" % patch_apply_time)
     if connection_command:
         # remove remote patch file
         remove_args = shlex.split(connection_command)
         remove_args.append("rm %s" % shlex.quote(remote_patch_file))
         log.debug("Removing the remote temporary patch file: %s" % str(remove_args))
-        try:
-            remove_process = subprocess.Popen(remove_args, stderr=subprocess.PIPE)
-        except OSError as exc:
-            raise TaskProcessingError("Failed to execute remote patch removal: %s" % str(exc))
-        if remove_process.wait() != 0:
-            raise TaskProcessingError("Failed to remove remote patch file (exitcode=%d): %s" % \
-                    (remove_process.returncode, _get_pipe_output(remove_process.stderr)))
+        plumbum.local[remove_args[0]](remove_args[1:])
     else:
         os.unlink(bdsync_out.name)
 
