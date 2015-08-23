@@ -36,7 +36,7 @@ except ImportError:
     import ConfigParser as configparser
 
 try:
-    import plumbumx
+    import plumbum
 except ImportError:
     import sys
     sys.stderr.write("[ERROR] bdsync-manager: Failed to import the required python module 'plumbum'.{0}".format(os.linesep))
