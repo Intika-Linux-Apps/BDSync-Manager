@@ -1,0 +1,35 @@
+[DEFAULT]
+local_bdsync_bin = /usr/local/bin/bdsync
+remote_bdsync_bin = /usr/local/bin/bdsync
+connection_command = ssh -p 2200 foo-backup@example.org
+target_patch_dir = bdsync-patches
+bdsync_args = --diffsize=resize
+lvm_snapshot_enabled = yes
+lvm_snapshot_size = 5G
+lvm_snapshot_name = bdsync-snapshot
+
+[example-root]
+# the raw root partition is copied without snapshotting to a remote file
+source_path = /dev/sda1
+target_path = bdsync/example-root.img
+lvm_snapshot_enabled = no
+
+[example-home]
+# the home volume is copied safely with LVM snapshotting
+source_path = /dev/lvm-foo/example-home
+target_path = bdsync/example-home.img
+
+[example-mail]
+# this task is currently disabled
+source_path = /dev/lvm-foo/example-mail
+target_path = bdsync/example-mail.img
+disabled = True
+
+[example-home-2nd]
+# for the paranoid: copy the home volume again to an alternative backup location with a blockdevice target
+source_path = /dev/lvm-foo/example-home
+target_path = /dev/lvm-backups/foo-home
+connection_command = ssh foo-backup@failover.example.org
+# LVM blockdevices may differ in size (due to the configured extent size).
+# You need to make sure on your own that the target is bigger than the source.
+bdsync_args = --diffsize=minsize

@@ -113,19 +113,7 @@ The configuration file is structured with a [ini-file style](https://docs.python
 
 ### Example configuration ###
 
-    [DEFAULT]
-    local_bdsync_bin = /usr/local/bin/bdsync
-    remote_bdsync_bin = /usr/local/bin/bdsync
-    connection_command = ssh -p 2200 foo@example.org
-    target_patch_dir = bdsync-patches
-    bdsync_args = --diffsize=resize
-
-    [example-root]
-    source_path = /dev/lvm-foo/example-root
-    target_path = bdsync/example-root.img
-    lvm_snapshot_enabled = yes
-    lvm_snapshot_size = 5G
-    lvm_snapshot_name = bdsync-snapshot
+See the [example configuration file](bdsync-manager.conf.sample) for the definitions of a few typical tasks.
 
 
 ### Core settings ###

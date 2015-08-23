@@ -17,25 +17,6 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-Config file format (example):
-
-    [DEFAULT]
-    local_bdsync_bin = /usr/local/bin/bdsync
-    remote_bdsync_bin = /usr/local/bin/bdsync
-    connection_command = ssh -p 2200 foo@target
-    target_patch_dir = /tmp
-    bdsync_args = --hash=sha1 --diffsize=resize
-
-    [example-root]
-    source_path = /dev/lvm-foo/example-root
-    target_path = backup/example-root
-    lvm_snapshot_enabled = yes
-    lvm_snapshot_size = 5G
-    lvm_snapshot_name = bdsync-snapshot
-
-The above configuration values are merely an example and do not represent bdsync-manager's defaults.
 """
 
 import argparse
