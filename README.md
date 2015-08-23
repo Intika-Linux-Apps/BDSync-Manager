@@ -46,7 +46,7 @@ Please note that you also need *bdsync* available on the target host for all rem
 
 1. download and install the requirements (see above)
 2. clone the *bdsync-manager* repository or download and extract a release archive
-3. (optional) symlink or copy *bdsync-manager.py* to a path used for executables (e.g. *cp bdsync-manager.py /usr/local/bin/bdsync-manager*)
+3. (optional) symlink or copy *bdsync-manager* to a path used for executables (e.g. */usr/local/bin/bdsync-manager*)
 4. create a configuration file (see below)
 
 
