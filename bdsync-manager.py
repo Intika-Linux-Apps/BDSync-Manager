@@ -64,7 +64,7 @@ def load_settings(config):
     settings = {}
     try:
         settings["local_bdsync_bin"] = config["local_bdsync_bin"]
-        settings["remote_bdsync_bin"] = config["remote_bdsync_bin"]
+        settings["remote_bdsync_bin"] = config("remote_bdsync_bin", None)
         settings["bdsync_args"] = config.get("bdsync_args", "")
         settings["source_path"] = config["source_path"]
         settings["target_path"] = config["target_path"]
@@ -88,6 +88,8 @@ def validate_settings(settings):
         raise TaskSettingsError("The local 'bdsync' binary was not found (%s)." % settings["local_bdsync_bin"])
     if not os.path.exists(settings["source_path"]):
         raise TaskSettingsError("The source device (source_path=%s) does not exist" % settings["source_path"])
+    if settings["connection_command"] and not settings["remote_bdsync_bin"]:
+        raise TaskSettingsError("The setting 'remote_bdsync_bin' is required if 'connection_command' is defined.")
     if "lvm" in settings:
         if not LVM_SIZE_REGEX.match(settings["lvm"]["snapshot_size"]):
             raise TaskSettingsError("Invalid LVM snapshot size (%s)" % settings["lvm"]["snapshot_size"])
@@ -142,7 +144,7 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
         patch_size_command = patch_size_args.pop(0)
         patch_size_func = plumbum.local[patch_size_command][tuple(patch_size_args)]
     else:
-        remote_command = "%s --server" % shlex.quote(remote_bdsync)
+        remote_command = "%s --server" % shlex.quote(local_bdsync)
         local_patch_file = tempfile.NamedTemporaryFile(dir=target_patch_dir, delete=False)
         patch_size_func = lambda: os.path.getsize(local_patch_file.name)
         output_command = None
