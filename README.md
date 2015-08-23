@@ -35,7 +35,7 @@ Please take a detailed look at [bdsync]((https://github.com/TargetHolding/bdsync
 The following software is required for running *bdsync-manager*:
 
 * [bdsync]((https://github.com/TargetHolding/bdsync): efficiently create and apply patches for blockdevice synchronization
-* [Python](http://python.org/): *bdsync-manager* is written in Python and works with Python 2 and Python 3
+* [Python](http://python.org/): *bdsync-manager* is written in Python and requires Python 3.2 or later
 * [plumbum](http://plumbum.readthedocs.org/): this python library provides easy access to typical shell-based features (e.g. pipelining processes)
 
 
