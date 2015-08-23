@@ -51,7 +51,7 @@ def load_settings(config):
     settings = {}
     try:
         settings["local_bdsync_bin"] = config["local_bdsync_bin"]
-        settings["remote_bdsync_bin"] = config("remote_bdsync_bin", None)
+        settings["remote_bdsync_bin"] = config.get("remote_bdsync_bin", None)
         settings["bdsync_args"] = config.get("bdsync_args", "")
         settings["source_path"] = config["source_path"]
         settings["target_path"] = config["target_path"]
