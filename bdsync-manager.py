@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
     bdsync-manager: maintain synchronization tasks for remotely or locally synchronized blockdevices via bdsync
@@ -20,7 +20,6 @@
 """
 
 import argparse
-import configparser
 import datetime
 import logging
 import os
@@ -29,7 +28,19 @@ import shlex
 import tempfile
 import time
 
-import plumbum
+try:
+    # for Python 3
+    import configparser
+except ImportError:
+    # stay compatible with Python 2
+    import ConfigParser as configparser
+
+try:
+    import plumbumx
+except ImportError:
+    import sys
+    sys.stderr.write("[ERROR] bdsync-manager: Failed to import the required python module 'plumbum'.{0}".format(os.linesep))
+    sys.exit(1)
 
 
 LVM_SIZE_REGEX = re.compile(r"^[0-9]+[bBsSkKmMgGtTpPeE]?$")
