@@ -35,6 +35,10 @@ except ImportError:
     # stay compatible with Python 2
     import ConfigParser as configparser
 
+# monkey-patch the old configparser (before Python 3.2) in order to provide ".read_file"
+if not hasattr(configparser, "read_file"):
+    configparser.read_file = configparser.readfp
+
 try:
     import plumbum
 except ImportError:
