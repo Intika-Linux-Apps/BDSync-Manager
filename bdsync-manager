@@ -63,6 +63,7 @@ def load_settings(config):
             settings["lvm"] = {
                     "snapshot_size": config["lvm_snapshot_size"],
                     "snapshot_name": config.get("lvm_snapshot_name", "bdsync-snapshot"),
+                    "program_path": config.get("lvm_program_path", "/sbin/lvm"),
             }
     except configparser.NoOptionError as exc:
         raise TaskSettingsError("Missing a mandatory task option: %s" % str(exc))
@@ -78,9 +79,11 @@ def validate_settings(settings):
     if settings["connection_command"] and not settings["remote_bdsync_bin"]:
         raise TaskSettingsError("The setting 'remote_bdsync_bin' is required if 'connection_command' is defined.")
     if "lvm" in settings:
+        if not os.path.exists(settings["lvm"]["program_path"]):
+            raise TaskSettingsError("Failed to find 'lvm' executable (lvm_program_path='%s')" % settings["lvm"]["program_path"])
         if not LVM_SIZE_REGEX.match(settings["lvm"]["snapshot_size"]):
             raise TaskSettingsError("Invalid LVM snapshot size (%s)" % settings["lvm"]["snapshot_size"])
-        vg_name = plumbum.local["lvs"]("--noheadings", "--options", "vg_name", settings["source_path"]).strip()
+        vg_name = plumbum.local[settings["lvm"]["program_path"]]("lvs", "--noheadings", "--options", "vg_name", settings["source_path"]).strip()
         if not vg_name:
             raise TaskSettingsError("Failed to discover the name of the Volume Group of '{source}' via 'lvs'"
                                       .format(source=settings["source_path"]))
@@ -202,7 +205,7 @@ def process_task(config):
     # everything looks fine - we can start
     if "lvm" in settings:
         real_source = prepare_lvm_snapshot(settings["source_path"], settings["lvm"]["vg_name"],
-                settings["lvm"]["snapshot_name"], settings["lvm"]["snapshot_size"])
+                settings["lvm"]["snapshot_name"], settings["lvm"]["snapshot_size"], settings["lvm"]["program_path"])
     else:
         real_source = settings["source_path"]
     try:
@@ -210,18 +213,18 @@ def process_task(config):
                 settings["connection_command"], settings["local_bdsync_bin"], settings["remote_bdsync_bin"], settings["bdsync_args"])
     finally:
         if "lvm" in settings:
-            cleanup_lvm_snapshot(settings["lvm"]["vg_name"], settings["lvm"]["snapshot_name"])
+            cleanup_lvm_snapshot(settings["lvm"]["vg_name"], settings["lvm"]["snapshot_name"], settings["lvm"]["program_path"])
 
 
-def prepare_lvm_snapshot(source_path, vg_name, snapshot_name, snapshot_size):
+def prepare_lvm_snapshot(source_path, vg_name, snapshot_name, snapshot_size, lvm_path):
     log.info("Creating LVM snapshot: {vg_name}/{snapshot_name}".format(vg_name=vg_name, snapshot_name=snapshot_name))
-    plumbum.local["lvcreate"]("--snapshot", "--name", snapshot_name, "--size", snapshot_size, source_path)
+    plumbum.local[lvm_path]("lvcreate", "--snapshot", "--name", snapshot_name, "--size", snapshot_size, source_path)
     return "/dev/{vg_name}/{snapshot_name}".format(vg_name=vg_name, snapshot_name=snapshot_name)
 
 
-def cleanup_lvm_snapshot(vg_name, snapshot_name):
+def cleanup_lvm_snapshot(vg_name, snapshot_name, lvm_path):
     log.info("Removing LVM snapshot: {vg_name}/{snapshot_name}".format(vg_name=vg_name, snapshot_name=snapshot_name))
-    plumbum.local["lvremove"]("--force", "%s/%s" % (vg_name, snapshot_name))
+    plumbum.local[lvm_path]("lvremove", "--force", "%s/%s" % (vg_name, snapshot_name))
 
 
 def parse_arguments():

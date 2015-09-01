@@ -181,3 +181,8 @@ This setting is required if *lvm_snapshot_enabled* is *True*.
 The name of the snapshot volume should not conflict with the names of other volumes in the same volume group on the local host. *bdsync-manager* will stop if it exists (e.g. a remainder of a previous synchronization run). The snapshot will be removed immediately after each task.
 
 This setting is required if *lvm_snapshot_enabled* is *True*.
+
+#### lvm_program_path ####
+The location of the *lvm* executable is needed for LVM snapshot management.
+
+This setting defaults to */sbin/lvm*.
