@@ -30,3 +30,6 @@ $(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE)
 
 $(RELEASE_ARCHIVE_FILE):
 	tar czf "$(RELEASE_ARCHIVE_FILE)" --exclude-vcs --exclude=$(RELEASE_DIR) .
+
+website:
+	make -C website html

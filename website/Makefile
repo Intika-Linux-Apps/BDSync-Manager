@@ -7,7 +7,6 @@ INPUTDIR=$(BASEDIR)/content
 OUTPUTDIR=$(BASEDIR)/output
 THEMEDIR=$(BASEDIR)/theme
 CONFFILE=$(BASEDIR)/pelicanconf.py
-PUBLISHCONF=$(BASEDIR)/publishconf.py
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
@@ -26,7 +25,6 @@ help:
 	@echo '   make html                           (re)generate the web site          '
 	@echo '   make clean                          remove the generated files         '
 	@echo '   make regenerate                     regenerate files upon modification '
-	@echo '   make publish                        generate using production settings '
 	@echo '                                                                          '
 	@echo 'Set the DEBUG variable to 1 to enable debugging, e.g. make DEBUG=1 html   '
 	@echo 'Set the RELATIVE variable to 1 to enable relative urls                    '
@@ -41,7 +39,13 @@ clean:
 regenerate:
 	$(PELICAN) --theme-path $(THEMEDIR) -r $(INPUTDIR) -o $(OUTPUTDIR) -s $(CONFFILE) $(PELICANOPTS)
 
-publish:
-	$(PELICAN) --theme-path $(THEMEDIR) $(INPUTDIR) -o $(OUTPUTDIR) -s $(PUBLISHCONF) $(PELICANOPTS)
+cvs-checkout:
+	@[ -z "$(UPLOAD_USER)" ] && { echo >&2 "ERROR: Missing savannah user name for upload:\n	make upload UPLOAD_USER=foobar"; exit 1; } || true
+	CVS_RSH=ssh cvs -z3 -d:ext:$(UPLOAD_USER)@cvs.sv.gnu.org:/web/bdsync-manager co bdsync-manager
+	rm -rf "$(OUTPUTDIR)"
+	mv bdsync-manager "$(OUTPUTDIR)"
 
-.PHONY: html help clean regenerate publish
+cvs-publish:
+	cd "$(OUTPUTDIR)"; cvs commit
+
+.PHONY: html help clean regenerate publish cvs-checkout check-empty-user
