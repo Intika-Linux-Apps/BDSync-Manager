@@ -12,7 +12,16 @@
 @import url("reset.css");
 @import url("pygment.css");
 @import url("typogrify.css");
+
+/* we do not want to downloads external data - see below for the exapansion of this font data
 @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz&subset=latin);
+*/
+@font-face {
+	font-family: 'Yanone Kaffeesatz';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Yanone Kaffeesatz Regular'), local('YanoneKaffeesatz-Regular'), url("../yanonekaffeesatz_v7.ttf") format('truetype');
+}
 
 /***** Global *****/
 /* Body */

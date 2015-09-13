@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 AUTHOR = u'Lars Kruse'
 SITENAME = u'bdsync-manager'
-SITEURL = ''
+SITEURL = 'http://www.nongnu.org/bdsync-manager'
 
 PATH = 'content'
 
@@ -13,7 +13,8 @@ TIMEZONE = 'Europe/Berlin'
 DEFAULT_LANG = u'en'
 
 # Feed generation is usually not desired when developing
-FEED_ALL_ATOM = None
+FEED_ALL_ATOM = "feed.atom"
+FEED_ALL_RSS = "feed.rss"
 CATEGORY_FEED_ATOM = None
 TRANSLATION_FEED_ATOM = None
 AUTHOR_FEED_ATOM = None
@@ -33,11 +34,12 @@ LINKS = (
 SOCIAL = []
 
 DEFAULT_PAGINATION = 10
+SUMMARY_MAX_LENGTH = 500
 
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
 
-THEME = "notmyidea"
+#THEME = "notmyidea-bdsync-manager"
 
 # we turn off some details
 DISPLAY_CATEGORIES_ON_MENU = False
