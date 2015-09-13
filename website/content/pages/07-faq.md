@@ -1,10 +1,10 @@
 Title: FAQ
 
 
-# Why should I use bdsync instead of rsync? #
+## Why should I use bdsync instead of rsync? ##
 *rsync* does not work with blockdevices. Thus if you need to synchronize a blockdevice with a local or remote file or blockdevice then you need to use *bdsync* instead.
 
-# Why not use bdsync directly? #
+## Why not use bdsync directly? ##
 *bdsync* is carefully designed to minimize the probability of a corrupted backup target by separating the synchronization into three steps:
 
 1. create the patch
@@ -17,7 +17,7 @@ All three steps could be executed in a single nifty shell command line by piping
 
 In short: *bdsync-manager* makes it just a bit easier to use *bdsync* for a specifc but quite typical use-case.
 
-# How should I transfer the initial copy? #
+## How should I transfer the initial copy? ##
 This depends on your usage of *bdsync* and is not specific for *bdsync-manager*.
 
 The fail-safe approach for the initial copy is a transfer via *ssh* to the remote host:

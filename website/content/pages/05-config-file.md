@@ -1,7 +1,6 @@
-Title: Configuration File
+Title: Configuration file
 
 
-# Configuration file #
 By default *bdsync-manager* reads its configuration from */etc/bdsync-manager.conf*. You may specify an alternative location as a command line argument (*--config*).
 
 The configuration file is structured with a [ini-file style](https://docs.python.org/3/library/configparser.html#supported-ini-file-structure). Each section describes one task. The special section *DEFAULT* can be used to specify defaults that are used for all other sections (if not overwritten explicitely).
