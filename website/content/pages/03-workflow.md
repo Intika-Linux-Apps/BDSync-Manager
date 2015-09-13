@@ -1,4 +1,4 @@
-Title: Typical Workflows
+Title: Workflows
 
 ## Replicate a virtualization server remotely ##
 

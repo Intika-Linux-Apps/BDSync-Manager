@@ -27,6 +27,7 @@ LINKS = (
         ('bdsync', 'https://github.com/TargetHolding/bdsync/'),
         ('Python', 'http://python.org/'),
         ('plumbum', 'http://plumbum.readthedocs.org/'),
+        ('savannah', 'http://savannah.nongnu.org/'),
         ('Pelican', 'http://getpelican.com/'),
 )
 

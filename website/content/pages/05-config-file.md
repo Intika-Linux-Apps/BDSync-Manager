@@ -1,4 +1,4 @@
-Title: Configuration file
+Title: Configuration
 
 
 By default *bdsync-manager* reads its configuration from */etc/bdsync-manager.conf*. You may specify an alternative location as a command line argument (*--config*).
