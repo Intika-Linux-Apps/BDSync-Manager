@@ -19,6 +19,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+# python standard modules
 import argparse
 import configparser
 import datetime
@@ -26,16 +27,19 @@ import logging
 import os
 import re
 import shlex
+import sys
 import tempfile
 import time
 
+_EXITCODE_MISSING_DEPENDENCY = 1
 
+# import non-standard modules
 try:
     import plumbum
 except ImportError:
     import sys
     sys.stderr.write("[ERROR] bdsync-manager: Failed to import the required python module 'plumbum'.{0}".format(os.linesep))
-    sys.exit(1)
+    sys.exit(_EXITCODE_MISSING_DEPENDENCY)
 
 
 LVM_SIZE_REGEX = re.compile(r"^[0-9]+[bBsSkKmMgGtTpPeE]?$")
