@@ -32,6 +32,7 @@ import tempfile
 import time
 
 _EXITCODE_MISSING_DEPENDENCY = 1
+_EXITCODE_CONFIGURATION_ERROR = 2
 
 # import non-standard modules
 try:
@@ -264,7 +265,11 @@ if __name__ == "__main__":
     args = parse_arguments()
     config = configparser.ConfigParser()
     log.debug("Reading config file: %s" % str(args.config_file.name))
-    config.read_file(args.config_file)
+    try:
+        config.read_file(args.config_file)
+    except configparser.Error as err:
+        log.error("Failed to parse configuration: %s", err)
+        sys.exit(_EXITCODE_CONFIGURATION_ERROR)
     if args.tasks:
         tasks = []
         for task in args.tasks:
