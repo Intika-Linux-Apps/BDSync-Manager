@@ -152,7 +152,7 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
         chain = patch_source | output_command
     else:
         chain = patch_source > local_patch_file
-    log.debug("Starting local bdsync process: %s" % str(args))
+    log.debug("Starting local bdsync process: %s" % str(create_patch_args))
     chain()
     patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
     log.debug("bdsync successfully created and transferred a binary patch")
