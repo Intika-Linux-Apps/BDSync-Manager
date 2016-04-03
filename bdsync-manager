@@ -130,9 +130,9 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
         log.debug("Using remote temporary patch file: %s" % str(remote_patch_file))
         output_command_args = shlex.split(connection_command)
         output_command_args.append("cat > %s" % shlex.quote(remote_patch_file))
-        log.debug("Using remote patch transfer: %s" % str(output_command_args))
         output_command_command = output_command_args.pop(0)
         output_command = plumbum.local[output_command_command][tuple(output_command_args)]
+        log.debug("Using remote patch transfer: %s", " ".join(output_command.formulate()))
         patch_size_args = shlex.split(connection_command)
         # "stat --format %s" returns the size of the file in bytes
         patch_size_args.append("stat --format %%s %s" % shlex.quote(remote_patch_file))
@@ -157,7 +157,7 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
         chain = patch_source | output_command
     else:
         chain = patch_source > local_patch_file
-    log.debug("Starting local bdsync process: %s" % str(create_patch_args))
+    log.debug("Starting local bdsync process: %s", " ".join(chain.formulate()))
     chain()
     patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
     log.debug("bdsync successfully created and transferred a binary patch")
@@ -223,13 +223,17 @@ def process_task(config):
 
 def prepare_lvm_snapshot(source_path, vg_name, snapshot_name, snapshot_size, lvm_path):
     log.info("Creating LVM snapshot: {vg_name}/{snapshot_name}".format(vg_name=vg_name, snapshot_name=snapshot_name))
-    plumbum.local[lvm_path]("lvcreate", "--snapshot", "--name", snapshot_name, "--size", snapshot_size, source_path)
+    cmd = plumbum.local[lvm_path]["lvcreate", "--snapshot", "--name", snapshot_name, "--size", snapshot_size, source_path]
+    log.debug("LVM snapshot create command: %s", " ".join(cmd.formulate()))
+    cmd()
     return "/dev/{vg_name}/{snapshot_name}".format(vg_name=vg_name, snapshot_name=snapshot_name)
 
 
 def cleanup_lvm_snapshot(vg_name, snapshot_name, lvm_path):
     log.info("Removing LVM snapshot: {vg_name}/{snapshot_name}".format(vg_name=vg_name, snapshot_name=snapshot_name))
-    plumbum.local[lvm_path]("lvremove", "--force", "%s/%s" % (vg_name, snapshot_name))
+    cmd = plumbum.local[lvm_path]["lvremove", "--force", "%s/%s" % (vg_name, snapshot_name)]
+    log.debug("LVM snapshot remove command: %s", " ".join(cmd.formulate()))
+    cmd()
 
 
 def parse_arguments():
