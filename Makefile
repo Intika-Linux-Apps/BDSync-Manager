@@ -16,7 +16,7 @@ RM ?= rm -f
 SETUPTOOLS ?= python3 setup.py
 
 
-.PHONY: release sign upload pypi-upload website clean
+.PHONY: release sign upload pypi-upload website website-upload clean
 
 
 release: $(RELEASE_ARCHIVE_FILE)
@@ -38,7 +38,10 @@ pypi-upload: sign release
 	$(SETUPTOOLS) sdist upload
 
 website:
-	make -C website html
+	$(MAKE) -C website html
+
+website-upload: website
+	$(MAKE) -C website cvs-publish
 
 clean:
 	$(MAKE) -C website clean

@@ -1,0 +1,11 @@
+# Release information
+
+* introduce and test interesting features
+* increase VERSION in bdsync_manager/__init__.py
+* upload to savannah: make upload
+* upload to pypi: make pypi-upload
+* add release announcement to website:
+** create a release announcement (website/content/release-X.Y.md)
+** make website
+** (cd website/output; cvs add release-X.Y.md)
+** make website-upload
