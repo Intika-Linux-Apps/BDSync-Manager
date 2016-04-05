@@ -48,7 +48,8 @@ def get_remote_tempfile(connection_command, target, directory):
     # late import: we want to able to run "verify_requirements" in any case
     import plumbum
     cmd_args = shlex.split(connection_command)
-    cmd_args.append("mktemp --tmpdir=%s %s-XXXX.bdsync" % (shlex.quote(directory), shlex.quote(os.path.basename(target))))
+    cmd_args.append("mktemp --tmpdir={0} {1}-XXXX.bdsync"
+                    .format(shlex.quote(directory), shlex.quote(os.path.basename(target))))
     cmd_command = cmd_args.pop(0)
     output = plumbum.local[cmd_command](cmd_args)
     # remove linebreaks from result

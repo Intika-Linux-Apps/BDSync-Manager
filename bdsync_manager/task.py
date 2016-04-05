@@ -54,82 +54,120 @@ class Task:
                 lvm_volume.remove_snapshot()
 
 
-def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsync, remote_bdsync, bdsync_args):
-    log.info("Creating binary patch")
-    if connection_command:
-        # prepend the connection command
-        remote_command = "%s %s --server" % (connection_command, shlex.quote(remote_bdsync))
-        remote_patch_file = bdsync_manager.utils.get_remote_tempfile(connection_command, target,
-                                                                     target_patch_dir)
-        log.debug("Using remote temporary patch file: %s" % str(remote_patch_file))
-        output_command_args = shlex.split(connection_command)
-        output_command_args.append("cat > %s" % shlex.quote(remote_patch_file))
-        output_command_command = output_command_args.pop(0)
-        output_command = plumbum.local[output_command_command][tuple(output_command_args)]
-        log.debug("Using remote patch transfer: %s", " ".join(output_command.formulate()))
-        patch_size_args = shlex.split(connection_command)
+class BDSyncPatch:
+
+    def __init__(self, source, target, local_bdsync, bdsync_args):
+        self._source = source
+        self._target = target
+        self._local_bdsync = local_bdsync
+        self._bdsync_args = bdsync_args
+
+
+    def get_generate_command(self):
+        args = []
+        args.append(self._local_bdsync)
+        args.extend(shlex.split(self._bdsync_args))
+        args.append(self._bdsync_server_command)
+        args.append(self._source)
+        args.append(self._target)
+        command = args.pop(0)
+        return plumbum.local[command][tuple(args)]
+
+
+class LocalPatch(BDSyncPatch):
+
+    def __init__(self, source, target, local_bdsync, bdsync_args, target_patch_dir):
+        super().__init__(source, target, local_bdsync, bdsync_args)
+        self._bdsync_server_command = "%s --server" % shlex.quote(local_bdsync)
+        self._patch_file = tempfile.NamedTemporaryFile(dir=target_patch_dir, delete=False)
+
+    def get_transfer_command(self):
+        return self.get_generate_command() > self._patch_file
+
+    def get_size(self):
+        return os.path.getsize(self._patch_file.name)
+
+    def get_apply_command(self):
+        self._patch_file.seek(0)
+        patch_call_args = shlex.split(self._bdsync_args) + ["--patch"]
+        return plumbum.local[self._local_bdsync][tuple(patch_call_args)] < self._patch_file
+
+    def cleanup(self):
+        os.unlink(self._patch_file.name)
+
+
+class RemotePatch(BDSyncPatch):
+
+    def __init__(self, source, target, local_bdsync, bdsync_args, target_patch_dir, connection_command, remote_bdsync):
+        super().__init__(source, target, local_bdsync, bdsync_args)
+        self._connection_command = connection_command
+        self._remote_bdsync = remote_bdsync
+        self._bdsync_server_command = "%s %s --server" % (connection_command, shlex.quote(remote_bdsync))
+        self._patch_file = bdsync_manager.utils.get_remote_tempfile(connection_command, target, target_patch_dir)
+        log.debug("Using remote temporary patch file: %s", self._patch_file)
+
+    def get_transfer_command(self):
+        transfer_command_args = shlex.split(self._connection_command)
+        transfer_command_args.append("cat > %s" % shlex.quote(self._patch_file))
+        transfer_command_command = transfer_command_args.pop(0)
+        transfer_command = plumbum.local[transfer_command_command][tuple(transfer_command_args)]
+        log.debug("Using remote patch transfer: %s", " ".join(transfer_command.formulate()))
+        return self.get_generate_command() | transfer_command
+
+    def get_size(self):
+        patch_size_args = shlex.split(self._connection_command)
         # "stat --format %s" returns the size of the file in bytes
-        patch_size_args.append("stat --format %%s %s" % shlex.quote(remote_patch_file))
+        patch_size_args.append("stat --format %%s %s" % shlex.quote(self._patch_file))
         patch_size_command = patch_size_args.pop(0)
-        patch_size_func = plumbum.local[patch_size_command][tuple(patch_size_args)]
-    else:
-        remote_command = "%s --server" % shlex.quote(local_bdsync)
-        local_patch_file = tempfile.NamedTemporaryFile(dir=target_patch_dir, delete=False)
-        patch_size_func = lambda: os.path.getsize(local_patch_file.name)
-        output_command = None
-    # run bdsync and handle the resulting states
-    create_patch_args = []
-    create_patch_args.append(local_bdsync)
-    create_patch_args.extend(shlex.split(bdsync_args))
-    create_patch_args.append(remote_command)
-    create_patch_args.append(source)
-    create_patch_args.append(target)
-    create_patch_command = create_patch_args.pop(0)
-    patch_source = plumbum.local[create_patch_command][tuple(create_patch_args)]
-    patch_create_start_time = time.time()
-    if connection_command:
-        chain = patch_source | output_command
-    else:
-        chain = patch_source > local_patch_file
-    log.debug("Starting local bdsync process: %s", " ".join(chain.formulate()))
-    chain()
-    patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
-    log.debug("bdsync successfully created and transferred a binary patch")
-    log.info("Patch Create Time: %s" % patch_create_time)
-    log.info("Patch Size: %s" % sizeof_fmt(int(patch_size_func())))
-    patch_apply_start_time = time.time()
-    # everything went fine - now the patch should be applied
-    if connection_command:
-        patch_source = None
+        return plumbum.local[patch_size_command](tuple(patch_size_args))
+
+    def get_apply_command(self):
         # remote command: "bdsync [bdsync_args] --patch < PATCH_FILE"
         remote_command_tokens = []
-        remote_command_tokens.append(remote_bdsync)
-        remote_command_tokens.extend(shlex.split(bdsync_args))
+        remote_command_tokens.append(self._remote_bdsync)
+        remote_command_tokens.extend(shlex.split(self._bdsync_args))
         remote_command_tokens.append("--patch")
         remote_command_combined = " ".join([shlex.quote(token) for token in remote_command_tokens])
         # the input file is added after an unquoted "<"
-        remote_command_combined += " < %s" % shlex.quote(remote_patch_file)
+        remote_command_combined += " < %s" % shlex.quote(self._patch_file)
         # local command: "ssh foo@bar 'REMOTE_COMMAND'"
-        patch_call_args = shlex.split(connection_command)
+        patch_call_args = shlex.split(self._connection_command)
         patch_call_args.append(remote_command_combined)
         patch_call_command = patch_call_args.pop(0)
-        apply_patch = plumbum.local[patch_call_command][tuple(patch_call_args)]
+        return plumbum.local[patch_call_command][tuple(patch_call_args)]
+
+    def cleanup(self):
+        # remove remote patch file
+        remove_args = shlex.split(self._connection_command)
+        remove_args.append("rm %s" % shlex.quote(self._patch_file))
+        remove_command = remove_args.pop(0)
+        remove = plumbum.local[remove_command][remove_args]
+        log.debug("Removing remote temporary patch file: %s", " ".join(remove.formulate()))
+        remove()
+
+
+def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsync, remote_bdsync, bdsync_args):
+    log.info("Creating binary patch")
+    if connection_command:
+        patch = RemotePatch(source, target, local_bdsync, bdsync_args, target_patch_dir,
+                            connection_command, remote_bdsync)
     else:
-        local_patch_file.seek(0)
-        patch_call_args = shlex.split(bdsync_args) + ["--patch"]
-        apply_patch = (plumbum.local[local_bdsync][tuple(patch_call_args)] < local_patch_file)
-    log.debug("Applying the patch")
-    log.debug("bdsync patching: %s" % str(apply_patch))
+        patch = LocalPatch(source, target, local_bdsync, bdsync_args, target_patch_dir)
+    # run bdsync and handle the resulting states
+    patch_create_start_time = time.time()
+    patch_create_command = patch.get_transfer_command()
+    log.debug("Starting local bdsync process: %s", " ".join(patch_create_command.formulate()))
+    patch_create_command()
+    patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
+    log.debug("bdsync successfully created and transferred a binary patch")
+    log.info("Patch Create Time: %s", patch_create_time)
+    log.info("Patch Size: %s", bdsync_manager.utils.sizeof_fmt(int(patch.get_size())))
+    patch_apply_start_time = time.time()
+    # everything went fine - now the patch should be applied
+    apply_patch = patch.get_apply_command()
+    log.debug("Applying the patch: %s", " ".join(apply_patch.formulate()))
     apply_patch()
     patch_apply_time = datetime.timedelta(seconds=(time.time() - patch_apply_start_time))
     log.debug("Successfully applied the patch")
-    log.info("Patch Apply Time: %s" % patch_apply_time)
-    if connection_command:
-        # remove remote patch file
-        remove_args = shlex.split(connection_command)
-        remove_args.append("rm %s" % shlex.quote(remote_patch_file))
-        remove_command = remove_args.pop(0)
-        log.debug("Removing the remote temporary patch file: %s" % str(remove_args))
-        plumbum.local[remove_command](remove_args)
-    else:
-        os.unlink(local_patch_file.name)
+    log.info("Patch Apply Time: %s", patch_apply_time)
+    patch.cleanup()

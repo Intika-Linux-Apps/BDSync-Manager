@@ -75,7 +75,7 @@ def main():
             if task in settings.get_tasks():
                 tasks.append(task)
             else:
-                log.warning("Skipping unknown task: %s" % _get_safe_string(task))
+                log.warning("Skipping unknown task: %s", _get_safe_string(task))
     else:
         tasks = settings.tasks.keys()
     if not tasks:
