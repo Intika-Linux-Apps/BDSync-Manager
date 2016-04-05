@@ -21,7 +21,7 @@ This setting is required.
 The local or remote path of a file of blockdevice used as the target for the synchronization. This file or blockdevice must exist prior running *bdsync-manager*. Relative paths are interpretated relative to the current directory (local target) or relative to the remote user's home directory (remote target).
 
 ### connection_command ###
-A non-empty value of this settings indicates a remote operation. Typically you will want to use *ssh* for non-interactive remote connections (e.g. *connection_command = ssh -p 10022 backup@example.org*).
+A non-empty value of this setting indicates a remote operation. Typically you will want to use *ssh* for non-interactive remote connections (e.g. *connection_command = ssh -p 10022 backup@example.org*).
 
 You will need to specify *remote_bdsync_bin* if *connection_command* is non-empty.
 
