@@ -8,6 +8,7 @@ OUTPUTDIR=$(BASEDIR)/output
 THEMEDIR=$(BASEDIR)/theme
 CONFFILE=$(BASEDIR)/pelicanconf.py
 
+
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
 	PELICANOPTS += -D
@@ -17,6 +18,9 @@ RELATIVE ?= 0
 ifeq ($(RELATIVE), 1)
 	PELICANOPTS += --relative-urls
 endif
+
+
+.PHONY: html help clean regenerate publish cvs-checkout check-empty-user
 
 help:
 	@echo 'Makefile for a pelican Web site                                           '
@@ -47,5 +51,3 @@ cvs-checkout:
 
 cvs-publish:
 	cd "$(OUTPUTDIR)"; cvs commit
-
-.PHONY: html help clean regenerate publish cvs-checkout check-empty-user

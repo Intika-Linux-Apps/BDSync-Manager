@@ -13,7 +13,7 @@ RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
 
 
-.PHONY: release sign upload
+.PHONY: release sign upload website
 
 
 release: $(RELEASE_ARCHIVE_FILE)
