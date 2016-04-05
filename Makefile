@@ -12,8 +12,11 @@ RELEASE_ARCHIVE_FILE = $(RELEASE_PREFIX)$(VERSION).tar.gz
 RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
 
+RM ?= rm -f
+SETUPTOOLS ?= python3 setup.py
 
-.PHONY: release sign upload website
+
+.PHONY: release sign upload pypi-upload website clean
 
 
 release: $(RELEASE_ARCHIVE_FILE)
@@ -31,5 +34,13 @@ $(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE)
 $(RELEASE_ARCHIVE_FILE):
 	tar czf "$(RELEASE_ARCHIVE_FILE)" --exclude-vcs --exclude=$(RELEASE_DIR) .
 
+pypi-upload: sign release
+	$(SETUPTOOLS) sdist upload
+
 website:
 	make -C website html
+
+clean:
+	$(MAKE) -C website clean
+	# python build directories
+	$(RM) -r bdsync_manager.egg-info build dist

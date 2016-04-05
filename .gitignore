@@ -1,3 +1,6 @@
 .*.swp
 *.pyc
+bdsync_manager.egg-info/
+dist/
+build/
 website/output
