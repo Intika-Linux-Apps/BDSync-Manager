@@ -67,6 +67,7 @@ class TaskConfiguration(collections.UserDict):
             self["disabled"] = config.getboolean("disabled", False)
             self["connection_command"] = config.get("connection_command", None)
             self["target_patch_dir"] = config.get("target_patch_dir", None)
+            self["create_target_if_missing"] = config.getboolean("create_target_if_missing", False)
             lvm_snapshot_enabled = config.getboolean("lvm_snapshot_enabled", False)
             if lvm_snapshot_enabled:
                 self["lvm"] = {

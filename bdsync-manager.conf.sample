@@ -8,6 +8,8 @@ lvm_snapshot_enabled = yes
 lvm_snapshot_size = 5G
 lvm_snapshot_name = bdsync-snapshot
 lvm_program_path = /sbin/lvm
+# do not try to create the target if it is missing
+create_target_if_missing = False
 
 [example-root]
 # the raw root partition is copied without snapshotting to a remote file

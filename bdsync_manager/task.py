@@ -25,6 +25,7 @@ import time
 
 import plumbum
 
+import bdsync_manager
 import bdsync_manager.utils
 log = bdsync_manager.utils.get_logger()
 
@@ -48,7 +49,8 @@ class Task:
         try:
             run_bdsync(real_source, self.settings["target_path"], self.settings["target_patch_dir"],
                        self.settings["connection_command"], self.settings["local_bdsync_bin"],
-                       self.settings["remote_bdsync_bin"], self.settings["bdsync_args"])
+                       self.settings["remote_bdsync_bin"], self.settings["bdsync_args"],
+                       self.settings["create_target_if_missing"])
         finally:
             if "lvm" in self.settings:
                 lvm_volume.remove_snapshot()
@@ -87,6 +89,13 @@ class LocalPatch(BDSyncPatch):
     def get_size(self):
         return os.path.getsize(self._patch_file.name)
 
+    def target_exists(self):
+        return os.path.exists(self._target)
+
+    def create_target(self):
+        tfile = open(self._target, "w")
+        tfile.close()
+
     def get_apply_command(self):
         self._patch_file.seek(0)
         patch_call_args = shlex.split(self._bdsync_args) + ["--patch"]
@@ -121,6 +130,19 @@ class RemotePatch(BDSyncPatch):
         patch_size_command = patch_size_args.pop(0)
         return plumbum.local[patch_size_command](tuple(patch_size_args))
 
+    def target_exists(self):
+        cmd_args = shlex.split(self._connection_command)
+        cmd_args.append("test -e %s" % shlex.quote(self._target))
+        cmd_command = cmd_args.pop(0)
+        retcode = plumbum.local[cmd_command][tuple(cmd_args)].run()[0]
+        return retcode == 0
+
+    def create_target(self):
+        cmd_args = shlex.split(self._connection_command)
+        cmd_args.append("touch %s" % shlex.quote(self._target))
+        cmd_command = cmd_args.pop(0)
+        plumbum.local[cmd_command](tuple(cmd_args))
+
     def get_apply_command(self):
         # remote command: "bdsync [bdsync_args] --patch < PATCH_FILE"
         remote_command_tokens = []
@@ -146,7 +168,7 @@ class RemotePatch(BDSyncPatch):
         remove()
 
 
-def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsync, remote_bdsync, bdsync_args):
+def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsync, remote_bdsync, bdsync_args, create_if_missing):
     log.info("Creating binary patch")
     if connection_command:
         patch = RemotePatch(source, target, local_bdsync, bdsync_args, target_patch_dir,
@@ -157,7 +179,18 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
     patch_create_start_time = time.time()
     patch_create_command = patch.get_transfer_command()
     log.debug("Starting local bdsync process: %s", " ".join(patch_create_command.formulate()))
-    patch_create_command()
+    # TODO: replace ".run()" with "& RETCODE" as soon as Debian stretch is released
+    retcode = patch_create_command.run(retcode=(0, 6))[0]
+    if retcode == 6:
+        # a "read" error could indicate a non-existing remote target
+        if not patch.target_exists():
+            if create_if_missing:
+                log.warning("Creating missing target file: %s", target)
+                patch.create_target()
+                log.info("Trying again to create the patch")
+                patch_create_command()
+            else:
+                raise bdsync_manager.TaskProcessingError("The target does not exist (while 'create_target_if_missing' is disabled)")
     patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
     log.debug("bdsync successfully created and transferred a binary patch")
     log.info("Patch Create Time: %s", patch_create_time)

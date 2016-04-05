@@ -51,6 +51,13 @@ This setting is required if *connection_command* is specified.
 
 This setting is required.
 
+### create_target_if_missing ###
+*bdsync-manager* will try to create an empty target file (issuing a *touch* command) if the target is missing.
+
+This setting simplifies the initial run of a backup.
+
+This setting is optional and defaults to *False*.
+
 ## LVM support ##
 You may want to use LVM's snapshotting feature for creating a time-consistent copy of the source blockdevice.
 
