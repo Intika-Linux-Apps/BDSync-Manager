@@ -76,6 +76,10 @@ class TaskConfiguration(collections.UserDict):
                 }
         except configparser.NoOptionError as exc:
             raise TaskSettingsError("Missing a mandatory task option: %s" % str(exc))
+        # expand path names (e.g. user directories, ...)
+        path_filter = os.path.expanduser
+        for key in ("local_bdsync_bin", "remote_bdsync_bin", "source_path", "target_path", "target_patch_dir"):
+            self[key] = path_filter(self[key])
 
     def validate(self):
         if not os.path.isfile(self["local_bdsync_bin"]):
