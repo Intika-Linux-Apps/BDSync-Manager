@@ -35,7 +35,7 @@ class Configuration:
 
     def __init__(self, filename):
         log = bdsync_manager.utils.get_logger()
-        log.debug("Reading config file: %s" % str(filename))
+        log.debug("Reading config file: %s", filename)
         self.config = configparser.ConfigParser()
         try:
             self.config.read([filename])
@@ -79,32 +79,32 @@ class TaskConfiguration(collections.UserDict):
 
     def validate(self):
         if not os.path.isfile(self["local_bdsync_bin"]):
-            raise TaskSettingsError("The local 'bdsync' binary was not found (%s)."
+            raise TaskSettingsError("The local 'bdsync' binary was not found ({0})."
                                     .format(self["local_bdsync_bin"]))
         if not os.path.exists(self["source_path"]):
-            raise TaskSettingsError("The source device (source_path=%s) does not exist"
+            raise TaskSettingsError("The source device (source_path={0}) does not exist"
                                     .format(self["source_path"]))
         if self["connection_command"] and not self["remote_bdsync_bin"]:
             raise TaskSettingsError("The setting 'remote_bdsync_bin' is required if 'connection_command' is defined.")
         if "lvm" in self:
             if not os.path.exists(self["lvm"]["program_path"]):
-                raise TaskSettingsError("Failed to find 'lvm' executable (lvm_program_path='%s')"
+                raise TaskSettingsError("Failed to find 'lvm' executable (lvm_program_path='{0}')"
                                         .format(self["lvm"]["program_path"]))
             self["lvm"]["caller"] = bdsync_manager.lvm.Caller(self["lvm"]["program_path"])
             if not LVM_SIZE_REGEX.match(self["lvm"]["snapshot_size"]):
-                raise TaskSettingsError("Invalid LVM snapshot size (%s)"
+                raise TaskSettingsError("Invalid LVM snapshot size ({0})"
                                         .format(self["lvm"]["snapshot_size"]))
             vg_name = self["lvm"]["caller"]("lvs", "--noheadings", "--options", "vg_name",
                                             self["source_path"]).strip()
             if not vg_name:
-                raise TaskSettingsError("Failed to discover the name of the Volume Group of '{source}' via 'lvs'"
-                                        .format(source=self["source_path"]))
+                raise TaskSettingsError("Failed to discover the name of the Volume Group of '{0}' via 'lvs'"
+                                        .format(self["source_path"]))
             self["lvm"]["vg_name"] = vg_name
         if not self["connection_command"]:
             # local transfer
             if not os.path.exists(os.path.dirname(self["target_path"])):
-                raise TaskSettingsError("The directory of the local target (target_path=%s) does not exist"
+                raise TaskSettingsError("The directory of the local target (target_path={0}) does not exist"
                                         .format(self["target_path"]))
             if not os.path.isdir(self["target_patch_dir"]):
-                raise TaskSettingsError("The patch directory of the local target (target_patch_dir=%s) does not exist"
+                raise TaskSettingsError("The patch directory of the local target (target_patch_dir={0}) does not exist"
                                         .format(self["target_patch_dir"]))

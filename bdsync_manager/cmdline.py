@@ -64,7 +64,6 @@ def main():
         return EXITCODE_MISSING_DEPENDENCY
     log.debug("Parsing arguments")
     args = parse_arguments(log)
-    log.debug("Reading config file: %s" % str(args.config_file.name))
     try:
         settings = bdsync_manager.config.Configuration(args.config_file.name)
     except bdsync_manager.TaskSettingsError as error:
@@ -86,8 +85,8 @@ def main():
     from bdsync_manager.task import Task
     for task_name in tasks:
         task = Task(settings.tasks[task_name])
-        bdsync_manager.utils.set_log_format("[Task {0}] %%(levelname)s: %%(message)s"
-                                           .format(task_name))
+        bdsync_manager.utils.set_log_format("[Task {0}] %(levelname)s: %(message)s"
+                                            .format(task_name))
         try:
             task.run()
         except bdsync_manager.TaskProcessingError as error:
