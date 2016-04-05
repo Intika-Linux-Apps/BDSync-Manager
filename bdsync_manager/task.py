@@ -188,9 +188,12 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
                 log.warning("Creating missing target file: %s", target)
                 patch.create_target()
                 log.info("Trying again to create the patch")
+                # TODO: a pure copy would be more suitable now
                 patch_create_command()
             else:
                 raise bdsync_manager.TaskProcessingError("The target does not exist (while 'create_target_if_missing' is disabled)")
+        else:
+            raise bdsync_manager.TaskProcessingError("bdsync encountered a read error")
     patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
     log.debug("bdsync successfully created and transferred a binary patch")
     log.info("Patch Create Time: %s", patch_create_time)
