@@ -128,7 +128,7 @@ class RemotePatch(BDSyncPatch):
         # "stat --format %s" returns the size of the file in bytes
         patch_size_args.append("stat --format %%s %s" % shlex.quote(self._patch_file))
         patch_size_command = patch_size_args.pop(0)
-        return plumbum.local[patch_size_command](tuple(patch_size_args))
+        return int(plumbum.local[patch_size_command](tuple(patch_size_args)))
 
     def target_exists(self):
         cmd_args = shlex.split(self._connection_command)
@@ -194,7 +194,7 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
     patch_create_time = datetime.timedelta(seconds=(time.time() - patch_create_start_time))
     log.debug("bdsync successfully created and transferred a binary patch")
     log.info("Patch Create Time: %s", patch_create_time)
-    log.info("Patch Size: %s", bdsync_manager.utils.sizeof_fmt(int(patch.get_size())))
+    log.info("Patch Size: %s", bdsync_manager.utils.sizeof_fmt(patch.get_size()))
     patch_apply_start_time = time.time()
     # everything went fine - now the patch should be applied
     apply_patch = patch.get_apply_command()
