@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+#
+# simple script for calling bdsync_manager
+#
+
+import os
+import sys
+
+# add path of the current script to python's search path
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, BASE_DIR)
+
+from bdsync_manager.cmdline import main
+
+
+if __name__ == "__main__":
+    returncode = main()
+    sys.exit(returncode)
