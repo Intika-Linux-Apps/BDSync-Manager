@@ -1,0 +1,51 @@
+bdsync-manager
+==============
+
+bdsync-manager maintains and executes your synchronization tasks of local or remote blockdevices with the help of bdsync (https://github.com/TargetHolding/bdsync). It simplifies the setup of regular synchronization operations.
+
+bdsync-manager is written in Python and licensed under the GPL v3 or later (http://www.gnu.org/licenses/gpl.txt).
+
+See the website (http://www.nongnu.org/bdsync-manager/) for more details.
+
+
+Dependencies
+------------
+
+* Python 3
+* Python module 'plumbum' (http://plumbum.readthedocs.org/en/latest/)
+
+
+Usage / Installation
+--------------------
+
+There are three options for installing and/or using bdsync-manager.
+
+
+Python's package manager 'pip'
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Installation:
+  pip install bdsync-manager
+
+Usage:
+  bdsync-manager
+
+
+Release archive
+^^^^^^^^^^^^^^^
+
+Download and extract the latest release:
+  http://download.savannah.gnu.org/releases/bdsync-manager/
+
+Usage:
+  ./bdsync-manager
+
+
+Git checkout
+^^^^^^^^^^^^
+
+Checkout the latest state of the development repository:
+  git clone git://git.savannah.nongnu.org/bdsync-manager.git
+
+Usage:
+  ./bdsync-manager
