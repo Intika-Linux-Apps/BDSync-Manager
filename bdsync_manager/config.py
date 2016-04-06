@@ -65,6 +65,7 @@ class TaskConfiguration(collections.UserDict):
             self["source_path"] = config["source_path"]
             self["target_path"] = config["target_path"]
             self["disabled"] = config.getboolean("disabled", False)
+            self["apply_patch_in_place"] = config.getboolean("apply_patch_in_place", False)
             self["connection_command"] = config.get("connection_command", None)
             self["target_patch_dir"] = config.get("target_patch_dir", None)
             self["create_target_if_missing"] = config.getboolean("create_target_if_missing", False)
@@ -80,7 +81,9 @@ class TaskConfiguration(collections.UserDict):
         # expand path names (e.g. user directories, ...)
         path_filter = os.path.expanduser
         for key in ("local_bdsync_bin", "remote_bdsync_bin", "source_path", "target_path", "target_patch_dir"):
-            self[key] = path_filter(self[key])
+            # apply filtering only if value is set / non-empty
+            if self[key]:
+                self[key] = path_filter(self[key])
 
     def validate(self):
         if not os.path.isfile(self["local_bdsync_bin"]):

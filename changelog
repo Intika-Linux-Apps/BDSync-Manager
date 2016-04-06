@@ -1,3 +1,6 @@
+Version 0.2 - 2016-04-??
+* allow "apply_patch_in_place" without storing the patch in between
+
 Version 0.1 - 2016-04-05
 * interprete '~' in most path settings
 * add 'create_target_if_missing' option

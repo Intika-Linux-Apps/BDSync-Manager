@@ -47,7 +47,13 @@ class Task:
         else:
             real_source = self.settings["source_path"]
         try:
-            run_bdsync(real_source, self.settings["target_path"], self.settings["target_patch_dir"],
+            if self.settings["apply_patch_in_place"]:
+                bdsync_one_phase(real_source, self.settings["target_path"],
+                       self.settings["connection_command"], self.settings["local_bdsync_bin"],
+                       self.settings["remote_bdsync_bin"], self.settings["bdsync_args"],
+                       self.settings["create_target_if_missing"])
+            else:
+                bdsync_two_phases(real_source, self.settings["target_path"], self.settings["target_patch_dir"],
                        self.settings["connection_command"], self.settings["local_bdsync_bin"],
                        self.settings["remote_bdsync_bin"], self.settings["bdsync_args"],
                        self.settings["create_target_if_missing"])
@@ -168,7 +174,68 @@ class RemotePatch(BDSyncPatch):
         remove()
 
 
-def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsync, remote_bdsync, bdsync_args, create_if_missing):
+class InPlaceChange(RemotePatch):
+
+    def __init__(self, source, target, local_bdsync, bdsync_args, connection_command, remote_bdsync):
+        super().__init__(source, target, local_bdsync, bdsync_args)
+        self._connection_command = connection_command
+        self._remote_bdsync = remote_bdsync
+        self._bdsync_server_command = "%s %s --server" % (connection_command, shlex.quote(remote_bdsync))
+
+    def get_transfer_command(self):
+        return plumbum.local["true"]
+
+    def get_size(self):
+        return 0
+
+    def get_apply_command(self):
+        if self._connection_command:
+            apply_args = shlex.split(self._connection_command)
+        else:
+            apply_args = []
+        apply_args.append(self._remote_bdsync)
+        apply_args.extend(shlex.split(self._bdsync_args))
+        apply_args.append("--patch")
+        apply_command_exec = apply_args.pop(0)
+        self.get_generate_command() | plumbumlocal[apply_command_exec](apply_args)
+
+    def cleanup(self):
+        pass
+
+
+def bdsync_one_phase(source, target, connection_command, local_bdsync, remote_bdsync, bdsync_args,
+                     create_if_missing):
+    log.info("Applying changes in place")
+    patch = InPlaceChange(source, target, local_bdsync, bdsync_args, connection_command, remote_bdsync)
+    start_time = time.time()
+    apply_command = patch.get_apply_command()
+    log.debug("Start to apply changes in place: %s", " ".join(apply_command.formulate()))
+    retcode = apply_command.run(retcode=(0, 6)[0]
+    if retcode == 6:
+        # a "read" error could indicate a non-existing remote target
+        if not patch.target_exists():
+            if create_if_missing:
+                log.warning("Creating missing target file: %s", target)
+                patch.create_target()
+                log.info("Trying again to create the patch")
+                apply_command()
+            else:
+                raise bdsync_manager.TaskProcessingError("The target does not exist (while 'create_target_if_missing' is disabled)")
+        else:
+            raise bdsync_manager.TaskProcessingError("bdsync encountered a read error")
+    patch_apply_time = datetime.timedelta(seconds=(time.time() - start_time))
+    log.info("Patch Apply Time: %s", patch_apply_time)
+    patch.cleanup()
+
+
+def bdsync_two_phases(source, target, target_patch_dir, connection_command, local_bdsync,
+                      remote_bdsync, bdsync_args, create_if_missing):
+    """ Run bdsync in two phases:
+        1) create the patch and store it close to the target
+        2) apply the patch
+        In case of a missing target, a switch to the one-phase operation (applying the patch
+        in-place) is possible.
+    """
     log.info("Creating binary patch")
     if connection_command:
         patch = RemotePatch(source, target, local_bdsync, bdsync_args, target_patch_dir,
@@ -188,8 +255,8 @@ def run_bdsync(source, target, target_patch_dir, connection_command, local_bdsyn
                 log.warning("Creating missing target file: %s", target)
                 patch.create_target()
                 log.info("Trying again to create the patch")
-                # TODO: a pure copy would be more suitable now
-                patch_create_command()
+                # prepare an in-place operation (for space efficiency)
+                patch = InPlaceChange(source, target, local_bdsync, bdsync_args, connection_command, remote_bdsync)
             else:
                 raise bdsync_manager.TaskProcessingError("The target does not exist (while 'create_target_if_missing' is disabled)")
         else:
