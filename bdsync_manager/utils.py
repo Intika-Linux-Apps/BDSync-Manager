@@ -1,5 +1,6 @@
 """
-    bdsync-manager: maintain synchronization tasks for remotely or locally synchronized blockdevices via bdsync
+    bdsync-manager: maintain synchronization tasks for remotely or locally
+    synchronized blockdevices via bdsync
 
     Copyright (C) 2015-2016 Lars Kruse <devel@sumpfralle.de>
 
@@ -29,22 +30,27 @@ __log_handler = None
 
 
 def get_logger():
+    """ retrieve the configured logger for bdsync-manager """
     global __logger
     global __log_handler
     if __logger is None:
         __logger = logging.getLogger("bdsync-manager")
         __log_handler = logging.StreamHandler()
-        __log_handler.setFormatter(logging.Formatter("[bdsync-manager] %(asctime)s - %(message)s"))
         __log_handler.setLevel(logging.DEBUG)
         __logger.addHandler(__log_handler)
+        set_log_format()
     return __logger
 
 
-def set_log_format(fmt):
+def set_log_format(fmt=None):
+    """ change the logging format (prefix) """
+    if fmt is None:
+        fmt = "[bdsync-manager] %(asctime)s - %(message)s"
     __log_handler.setFormatter(logging.Formatter(fmt))
 
 
 def get_remote_tempfile(connection_command, target, directory):
+    """ create a temporary file on a remote host """
     # late import: we want to able to run "verify_requirements" in any case
     import plumbum
     cmd_args = shlex.split(connection_command)
@@ -57,8 +63,9 @@ def get_remote_tempfile(connection_command, target, directory):
 
 
 def sizeof_fmt(num, suffix='B'):
+    """ format a size value (bytes) into a human readable value """
     # source: http://stackoverflow.com/a/1094933
-    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
         num /= 1024.0
@@ -66,6 +73,9 @@ def sizeof_fmt(num, suffix='B'):
 
 
 def verify_requirements():
+    """ check if all requirements are available
+        @raises RequirementsError
+    """
     try:
         import plumbum
     except ImportError:

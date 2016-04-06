@@ -43,6 +43,9 @@ website:
 website-upload: website
 	$(MAKE) -C website cvs-publish
 
+check:
+	pylint3 bdsync_manager || [ "$$?" = 30 ]
+
 clean:
 	$(MAKE) -C website clean
 	# python build directories

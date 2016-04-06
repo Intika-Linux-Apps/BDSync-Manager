@@ -1,5 +1,6 @@
 """
-    bdsync-manager: maintain synchronization tasks for remotely or locally synchronized blockdevices via bdsync
+    bdsync-manager: maintain synchronization tasks for remotely or locally
+    synchronized blockdevices via bdsync
 
     Copyright (C) 2015-2016 Lars Kruse <devel@sumpfralle.de>
 
@@ -19,6 +20,7 @@
 
 import argparse
 import logging
+import re
 
 import bdsync_manager
 import bdsync_manager.config
@@ -35,18 +37,16 @@ EXITCODE_CANCELLED = 4
 def parse_arguments(log):
     parser = argparse.ArgumentParser(description="Manage one or more bdsync transfers.")
     parser.add_argument("--log-level", dest="log_level", default="warning",
-            choices=("debug", "info", "warning", "error"), help="Output verbosity")
+                        choices=("debug", "info", "warning", "error"), help="Output verbosity")
     parser.add_argument("--config", metavar="CONFIG_FILE", dest="config_file",
-            default="/etc/bdsync-manager.conf", type=argparse.FileType('r'),
-            help="Location of the config file")
+                        default="/etc/bdsync-manager.conf", type=argparse.FileType('r'),
+                        help="Location of the config file")
     parser.add_argument("--task", metavar="TASK_NAME", dest="tasks", action="append")
     args = parser.parse_args()
-    log_levels = {
-            "debug": logging.DEBUG,
-            "info": logging.INFO,
-            "warning": logging.WARNING,
-            "error": logging.ERROR,
-    }
+    log_levels = {"debug": logging.DEBUG,
+                  "info": logging.INFO,
+                  "warning": logging.WARNING,
+                  "error": logging.ERROR}
     log.setLevel(log_levels[args.log_level])
     return args
 
@@ -72,7 +72,7 @@ def main():
     if args.tasks:
         tasks = []
         for task in args.tasks:
-            if task in settings.get_tasks():
+            if task in settings.tasks:
                 tasks.append(task)
             else:
                 log.warning("Skipping unknown task: %s", _get_safe_string(task))
@@ -100,9 +100,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        returncode = main()
+        exit(main())
     except KeyboardInterrupt:
-        log = bdsync_manager.utils.get_logger()
-        log.info("Cancelled task")
+        bdsync_manager.utils.get_logger().info("Cancelled task")
         exit(EXITCODE_CANCELLED)
-    exit(returncode)

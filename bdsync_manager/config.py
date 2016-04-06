@@ -1,5 +1,6 @@
 """
-    bdsync-manager: maintain synchronization tasks for remotely or locally synchronized blockdevices via bdsync
+    bdsync-manager: maintain synchronization tasks for remotely or locally
+    synchronized blockdevices via bdsync
 
     Copyright (C) 2015-2016 Lars Kruse <devel@sumpfralle.de>
 
@@ -71,16 +72,15 @@ class TaskConfiguration(collections.UserDict):
             self["create_target_if_missing"] = config.getboolean("create_target_if_missing", False)
             lvm_snapshot_enabled = config.getboolean("lvm_snapshot_enabled", False)
             if lvm_snapshot_enabled:
-                self["lvm"] = {
-                        "snapshot_size": config["lvm_snapshot_size"],
-                        "snapshot_name": config.get("lvm_snapshot_name", "bdsync-snapshot"),
-                        "program_path": config.get("lvm_program_path", "/sbin/lvm"),
-                }
+                self["lvm"] = {"snapshot_size": config["lvm_snapshot_size"],
+                               "snapshot_name": config.get("lvm_snapshot_name", "bdsync-snapshot"),
+                               "program_path": config.get("lvm_program_path", "/sbin/lvm")}
         except configparser.NoOptionError as exc:
             raise TaskSettingsError("Missing a mandatory task option: %s" % str(exc))
         # expand path names (e.g. user directories, ...)
         path_filter = os.path.expanduser
-        for key in ("local_bdsync_bin", "remote_bdsync_bin", "source_path", "target_path", "target_patch_dir"):
+        for key in ("local_bdsync_bin", "remote_bdsync_bin", "source_path",
+                    "target_path", "target_patch_dir"):
             # apply filtering only if value is set / non-empty
             if self[key]:
                 self[key] = path_filter(self[key])
@@ -93,7 +93,8 @@ class TaskConfiguration(collections.UserDict):
             raise TaskSettingsError("The source device (source_path={0}) does not exist"
                                     .format(self["source_path"]))
         if self["connection_command"] and not self["remote_bdsync_bin"]:
-            raise TaskSettingsError("The setting 'remote_bdsync_bin' is required if 'connection_command' is defined.")
+            raise TaskSettingsError("The setting 'remote_bdsync_bin' is required if "
+                                    "'connection_command' is defined.")
         if "lvm" in self:
             if not os.path.exists(self["lvm"]["program_path"]):
                 raise TaskSettingsError("Failed to find 'lvm' executable (lvm_program_path='{0}')"
@@ -105,14 +106,15 @@ class TaskConfiguration(collections.UserDict):
             vg_name = self["lvm"]["caller"]("lvs", "--noheadings", "--options", "vg_name",
                                             self["source_path"]).strip()
             if not vg_name:
-                raise TaskSettingsError("Failed to discover the name of the Volume Group of '{0}' via 'lvs'"
-                                        .format(self["source_path"]))
+                raise TaskSettingsError("Failed to discover the name of the Volume Group of "
+                                        "'{0}' via 'lvs'".format(self["source_path"]))
             self["lvm"]["vg_name"] = vg_name
         if not self["connection_command"]:
             # local transfer
             if not os.path.exists(os.path.dirname(self["target_path"])):
-                raise TaskSettingsError("The directory of the local target (target_path={0}) does not exist"
-                                        .format(self["target_path"]))
+                raise TaskSettingsError("The directory of the local target (target_path={0}) does "
+                                        "not exist".format(self["target_path"]))
             if not os.path.isdir(self["target_patch_dir"]):
-                raise TaskSettingsError("The patch directory of the local target (target_patch_dir={0}) does not exist"
+                raise TaskSettingsError("The patch directory of the local target "
+                                        "(target_patch_dir={0}) does not exist"
                                         .format(self["target_patch_dir"]))

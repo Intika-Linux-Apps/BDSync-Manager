@@ -1,5 +1,6 @@
 """
-    bdsync-manager: maintain synchronization tasks for remotely or locally synchronized blockdevices via bdsync
+    bdsync-manager: maintain synchronization tasks for remotely or locally
+    synchronized blockdevices via bdsync
 
     Copyright (C) 2015-2016 Lars Kruse <devel@sumpfralle.de>
 
@@ -21,7 +22,21 @@
 VERSION = "0.1"
 
 
-class BDSyncManagerError(Exception): pass
-class TaskProcessingError(BDSyncManagerError): pass
-class TaskSettingsError(BDSyncManagerError): pass
-class RequirementsError(BDSyncManagerError): pass
+class BDSyncManagerError(Exception):
+    """ base class for all bdsync-manager related errors """
+    pass
+
+
+class TaskProcessingError(BDSyncManagerError):
+    """ an error occoured while processing a bdsync-manager task """
+    pass
+
+
+class TaskSettingsError(BDSyncManagerError):
+    """ the configuration file contains invalid settings """
+    pass
+
+
+class RequirementsError(BDSyncManagerError):
+    """ a requirement of bdsync-manager is missing """
+    pass

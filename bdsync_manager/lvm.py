@@ -1,5 +1,6 @@
 """
-    bdsync-manager: maintain synchronization tasks for remotely or locally synchronized blockdevices via bdsync
+    bdsync-manager: maintain synchronization tasks for remotely or locally
+    synchronized blockdevices via bdsync
 
     Copyright (C) 2015-2016 Lars Kruse <devel@sumpfralle.de>
 
@@ -44,9 +45,9 @@ class Caller:
     def _check_path(self):
         try:
             self("version")
-        except plumbum.CommandNotFound as err:
+        except plumbum.CommandNotFound:
             raise bdsync_manager.RequirementsError("Failed to run LVM ({path}): command not found"
-                                    .format(path=self._exec_path))
+                                                   .format(path=self._exec_path))
 
 
 class Volume:
@@ -69,9 +70,9 @@ class Volume:
     def _create_snapshot(self, snapshot_name, snapshot_size):
         assert self._snapshot_name is None
         self._log.info("Creating LVM snapshot: {vg_name}/{snapshot_name}"
-                 .format(vg_name=self._group, snapshot_name=snapshot_name))
+                       .format(vg_name=self._group, snapshot_name=snapshot_name))
         cmd = self._caller["lvcreate", "--snapshot", "--name", snapshot_name,
-                            "--size", snapshot_size, self._get_path()]
+                           "--size", snapshot_size, self._get_path()]
         self._log.debug("LVM snapshot create command: %s", " ".join(cmd.formulate()))
         cmd()
         self._snapshot_name = snapshot_name
@@ -84,10 +85,11 @@ class Volume:
     def remove_snapshot(self):
         assert self._snapshot_name is not None
         self._log.info("Removing LVM snapshot: {vg_name}/{volume}"
-                 .format(vg_name=self._group, volume=self._snapshot_name))
+                       .format(vg_name=self._group, volume=self._snapshot_name))
         # TODO: replace dummy operation
         #cmd = self._caller["lvremove", "--force", "%s/%s" % (self._group, self._snapshot_name)]
-        cmd = plumbum.local["echo"]["lvremove", "--force", "%s/%s" % (self._group, self._snapshot_name)]
+        cmd = plumbum.local["echo"]["lvremove", "--force",
+                                    "{vg}/{lv}".format(vg=self._group, lv=self._snapshot_name)]
         self._log.debug("LVM snapshot remove command: %s", " ".join(cmd.formulate()))
         cmd()
         self._snapshot_name = None
