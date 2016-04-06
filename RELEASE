@@ -9,3 +9,6 @@
 ** make website
 ** (cd website/output; cvs add release-X.Y.md)
 ** make website-upload
+* add a release announcement to the savannah project website
+* send a release announcement to the mailing list
+* set a release tag: git tag -a vX.Y COMMIT_ID
