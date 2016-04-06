@@ -32,6 +32,18 @@ This convenience settings allows you to disable tasks easily. You may use any bo
 
 This setting is optional and defaults to *False*.
 
+### create_target_if_missing ###
+*bdsync-manager* will try to create an empty target file (issuing a *touch* command) if the target is missing.
+
+This setting simplifies the initial run of a backup.
+
+This setting is optional and defaults to *False*.
+
+### apply_path_in_place ###
+Instead of storing a binary patch on the target site and applying it afterward, the process is reduced to a single in-place operation.
+
+This will leave a corrupt or inconsistent image behind if the operation is interrupted. Thus this setting is only recommended for the first initial transfer of a blockdevice.
+
 ## bdsync-related settings ##
 ### local_bdsync_bin ###
 The location of the local *bdsync* binary (e.g. */usr/local/bin/bdsync*).
@@ -50,13 +62,6 @@ This setting is required if *connection_command* is specified.
 *bdsync*'s binary patches are stored locally or transferred to the remote target host. The path may be absolute or relative to the current directory (local target) or relative to the home directory of the remote user (remote target). You need to create this directory manually. You need to make sure that the directory is on a filesystem with enough free capacity for your *bdsync* patches. The full size of the largest blockdevice to be transferred is the worst case capacity requiremnt.
 
 This setting is required.
-
-### create_target_if_missing ###
-*bdsync-manager* will try to create an empty target file (issuing a *touch* command) if the target is missing.
-
-This setting simplifies the initial run of a backup.
-
-This setting is optional and defaults to *False*.
 
 ## LVM support ##
 You may want to use LVM's snapshotting feature for creating a time-consistent copy of the source blockdevice.
