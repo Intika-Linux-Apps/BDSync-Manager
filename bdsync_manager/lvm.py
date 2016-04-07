@@ -23,7 +23,7 @@ import os
 import plumbum
 
 import bdsync_manager
-import bdsync_manager.utils
+from bdsync_manager.utils import log
 
 
 class Caller:
@@ -57,7 +57,6 @@ class Volume:
         self._group = group
         self._volume = volume
         self._snapshot_name = None
-        self._log = bdsync_manager.utils.get_logger()
 
     def _get_path(self, volume=None):
         if volume is None:
@@ -69,11 +68,10 @@ class Volume:
 
     def _create_snapshot(self, snapshot_name, snapshot_size):
         assert self._snapshot_name is None
-        self._log.info("Creating LVM snapshot: {vg_name}/{snapshot_name}"
-                       .format(vg_name=self._group, snapshot_name=snapshot_name))
+        log.info("Creating LVM snapshot: %s/%s", self._group, snapshot_name)
         cmd = self._caller["lvcreate", "--snapshot", "--name", snapshot_name,
                            "--size", snapshot_size, self._get_path()]
-        self._log.debug("LVM snapshot create command: %s", " ".join(cmd.formulate()))
+        log.debug("LVM snapshot create command: %s", " ".join(cmd.formulate()))
         cmd()
         self._snapshot_name = snapshot_name
 
@@ -84,12 +82,11 @@ class Volume:
 
     def remove_snapshot(self):
         assert self._snapshot_name is not None
-        self._log.info("Removing LVM snapshot: {vg_name}/{volume}"
-                       .format(vg_name=self._group, volume=self._snapshot_name))
+        log.info("Removing LVM snapshot: %s/%s", self._group, self._snapshot_name)
         # TODO: replace dummy operation
         #cmd = self._caller["lvremove", "--force", "%s/%s" % (self._group, self._snapshot_name)]
         cmd = plumbum.local["echo"]["lvremove", "--force",
                                     "{vg}/{lv}".format(vg=self._group, lv=self._snapshot_name)]
-        self._log.debug("LVM snapshot remove command: %s", " ".join(cmd.formulate()))
+        log.debug("LVM snapshot remove command: %s", " ".join(cmd.formulate()))
         cmd()
         self._snapshot_name = None

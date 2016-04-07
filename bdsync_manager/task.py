@@ -27,8 +27,7 @@ import time
 import plumbum
 
 import bdsync_manager
-import bdsync_manager.utils
-log = bdsync_manager.utils.get_logger()
+from bdsync_manager.utils log
 
 
 class Task:

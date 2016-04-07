@@ -26,7 +26,7 @@ import re
 
 import bdsync_manager.lvm
 from bdsync_manager import TaskSettingsError
-import bdsync_manager.utils
+from bdsync_manager.utils import log
 
 
 LVM_SIZE_REGEX = re.compile(r"^[0-9]+[bBsSkKmMgGtTpPeE]?$")
@@ -35,7 +35,6 @@ LVM_SIZE_REGEX = re.compile(r"^[0-9]+[bBsSkKmMgGtTpPeE]?$")
 class Configuration:
 
     def __init__(self, filename):
-        log = bdsync_manager.utils.get_logger()
         log.debug("Reading config file: %s", filename)
         self.config = configparser.ConfigParser()
         try:

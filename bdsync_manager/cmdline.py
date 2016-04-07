@@ -24,7 +24,7 @@ import re
 
 import bdsync_manager
 import bdsync_manager.config
-import bdsync_manager.utils
+from bdsync_manager.utils import log
 
 
 EXITCODE_SUCCESS = 0
@@ -34,7 +34,7 @@ EXITCODE_TASK_PROCESSING_ERROR = 3
 EXITCODE_CANCELLED = 4
 
 
-def parse_arguments(log):
+def parse_arguments():
     parser = argparse.ArgumentParser(description="Manage one or more bdsync transfers.")
     parser.add_argument("--log-level", dest="log_level", default="warning",
                         choices=("debug", "info", "warning", "error"), help="Output verbosity")
@@ -56,14 +56,13 @@ def _get_safe_string(text):
 
 
 def main():
-    log = bdsync_manager.utils.get_logger()
     try:
         bdsync_manager.utils.verify_requirements()
     except bdsync_manager.RequirementsError as error:
         log.error(str(error))
         return EXITCODE_MISSING_DEPENDENCY
     log.debug("Parsing arguments")
-    args = parse_arguments(log)
+    args = parse_arguments()
     try:
         settings = bdsync_manager.config.Configuration(args.config_file.name)
     except bdsync_manager.TaskSettingsError as error:
@@ -102,5 +101,5 @@ if __name__ == "__main__":
     try:
         exit(main())
     except KeyboardInterrupt:
-        bdsync_manager.utils.get_logger().info("Cancelled task")
+        log.info("Cancelled task")
         exit(EXITCODE_CANCELLED)

@@ -25,28 +25,24 @@ import shlex
 from bdsync_manager import RequirementsError
 
 
-__logger = None
-__log_handler = None
 
 
-def get_logger():
+def __get_logger():
     """ retrieve the configured logger for bdsync-manager """
-    global __logger
-    global __log_handler
-    if __logger is None:
-        __logger = logging.getLogger("bdsync-manager")
-        __log_handler = logging.StreamHandler()
-        __log_handler.setLevel(logging.DEBUG)
-        __logger.addHandler(__log_handler)
+    try:
+        return log
+    except NameError:
+        new_logger = logging.getLogger("bdsync-manager")
+        new_logger.addHandler(logging.StreamHandler())
         set_log_format()
-    return __logger
+        return new_logger
 
 
 def set_log_format(fmt=None):
     """ change the logging format (prefix) """
     if fmt is None:
         fmt = "[bdsync-manager] %(asctime)s - %(message)s"
-    __log_handler.setFormatter(logging.Formatter(fmt))
+    __get_logger().handlers[-1].setFormatter(logging.Formatter(fmt))
 
 
 def get_remote_tempfile(connection_command, target, directory):
@@ -80,3 +76,6 @@ def verify_requirements():
         import plumbum
     except ImportError:
         raise RequirementsError("Failed to import the required python module 'plumbum'")
+
+
+log = __get_logger()
