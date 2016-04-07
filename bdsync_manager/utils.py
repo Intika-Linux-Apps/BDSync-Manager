@@ -19,8 +19,6 @@
 """
 
 import logging
-import os
-import shlex
 
 try:
     import plumbum
@@ -49,15 +47,14 @@ def set_log_format(fmt=None):
     __get_logger().handlers[-1].setFormatter(logging.Formatter(fmt))
 
 
-def get_remote_tempfile(connection_command, target, directory):
+def get_tempfile(directory, connection_tokens):
     """ create a temporary file on a remote host """
-    wrapped_cmd = shlex.split(connection_command)
     mktemp_cmd = get_command_from_tokens(["mktemp", "--tmpdir={0}".format(directory),
-                                          "{0}-XXXX.bdsync".format(os.path.basename(target))])
-    wrapped_cmd.append(mktemp_cmd)
-    output = get_command_from_tokens(wrapped_cmd)()
+                                          "patch-XXXXXX.bdsync"])
+    if connection_tokens:
+        mktemp_cmd = get_command_from_tokens(connection_tokens + [mktemp_cmd])
     # remove linebreaks from result
-    return output.rstrip("\n\r")
+    return mktemp_cmd().rstrip("\n\r")
 
 
 def sizeof_fmt(num, suffix='B'):
