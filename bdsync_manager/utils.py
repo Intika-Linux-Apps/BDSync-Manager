@@ -51,11 +51,11 @@ def set_log_format(fmt=None):
 
 def get_remote_tempfile(connection_command, target, directory):
     """ create a temporary file on a remote host """
-    cmd_args = shlex.split(connection_command)
-    cmd_args.append("mktemp --tmpdir={0} {1}-XXXX.bdsync"
-                    .format(shlex.quote(directory), shlex.quote(os.path.basename(target))))
-    cmd_command = cmd_args.pop(0)
-    output = plumbum.local[cmd_command](cmd_args)
+    wrapped_cmd = shlex.split(connection_command)
+    mktemp_cmd = get_command_from_tokens(["mktemp", "--tmpdir={0}".format(directory),
+                                          "{0}-XXXX.bdsync".format(os.path.basename(target))])
+    wrapped_cmd.append(mktemp_cmd)
+    output = get_command_from_tokens(wrapped_cmd)()
     # remove linebreaks from result
     return output.rstrip("\n\r")
 
@@ -78,6 +78,11 @@ def verify_requirements():
         import plumbum as foo
     except ImportError:
         raise RequirementsError("Failed to import the required python module 'plumbum'")
+
+
+def get_command_from_tokens(tokens):
+    """ turn a list of command + arguments into a plumbum command """
+    return plumbum.local[tokens[0]][tuple(tokens[1:])]
 
 
 log = __get_logger()
