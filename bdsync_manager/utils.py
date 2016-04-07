@@ -22,9 +22,13 @@ import logging
 import os
 import shlex
 
+try:
+    import plumbum
+except ImportError:
+    # ignore errors: we want to able to run "verify_requirements" in any case
+    pass
+
 from bdsync_manager import RequirementsError
-
-
 
 
 def __get_logger():
@@ -47,8 +51,6 @@ def set_log_format(fmt=None):
 
 def get_remote_tempfile(connection_command, target, directory):
     """ create a temporary file on a remote host """
-    # late import: we want to able to run "verify_requirements" in any case
-    import plumbum
     cmd_args = shlex.split(connection_command)
     cmd_args.append("mktemp --tmpdir={0} {1}-XXXX.bdsync"
                     .format(shlex.quote(directory), shlex.quote(os.path.basename(target))))
@@ -73,7 +75,7 @@ def verify_requirements():
         @raises RequirementsError
     """
     try:
-        import plumbum
+        import plumbum as foo
     except ImportError:
         raise RequirementsError("Failed to import the required python module 'plumbum'")
 
