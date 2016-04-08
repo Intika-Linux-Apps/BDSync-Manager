@@ -36,15 +36,17 @@ def __get_logger():
     except NameError:
         new_logger = logging.getLogger("bdsync-manager")
         new_logger.addHandler(logging.StreamHandler())
-        set_log_format()
+        set_log_format(logger=new_logger)
         return new_logger
 
 
-def set_log_format(fmt=None):
+def set_log_format(fmt=None, logger=None):
     """ change the logging format (prefix) """
     if fmt is None:
         fmt = "[bdsync-manager] %(asctime)s - %(message)s"
-    __get_logger().handlers[-1].setFormatter(logging.Formatter(fmt))
+    if logger is None:
+        logger = __get_logger()
+    logger.handlers[-1].setFormatter(logging.Formatter(fmt))
 
 
 def get_tempfile(directory, connection_tokens):
