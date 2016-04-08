@@ -44,7 +44,9 @@ website-upload: website
 	$(MAKE) -C website cvs-publish
 
 check:
-	pylint3 bdsync_manager || [ "$$?" = 30 ]
+	@# The exitcode of pylint is a bit pattern based on the severity of the issues, e.g.:
+	@#   0x20 = syntax errors, 0x02 = error message, 0x01 = fatal message
+	pylint3 bdsync_manager || [ "$$(( $$? & 0x23 ))" -eq 0 ]
 
 clean:
 	$(MAKE) -C website clean
