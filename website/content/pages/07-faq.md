@@ -18,12 +18,6 @@ All three steps could be executed in a single nifty shell command line by piping
 In short: *bdsync-manager* makes it just a bit easier to use *bdsync* for a specifc but quite typical use-case.
 
 ## How should I transfer the initial copy? ##
-This depends on your usage of *bdsync* and is not specific for *bdsync-manager*.
+The first initial copy should be created with an *in-place* operation (setting: *apply_patch_in_place*). This skips the patch creation and applies all changes (i.e. the full source content) on the fly. Afterwards you can disable this setting again if you prefer a more conservative style of operation.
 
-The fail-safe approach for the initial copy is a transfer via *ssh* to the remote host:
-
-    cat SOURCE_BLOCKDEVICE | ssh bar@foo.baz "cat >target.img"
-
-(Use [pv](http://www.ivarch.com/programs/pv.shtml) instead of *cat* for a fancy progress bar.)
-
-Alternatively (provided enough space for a full-size patch on the remote host) you can also create a dummy target file (e.g. *touch target.img*) and use *bdsync_args = --diffsize=resize* in your config file for the initial synchronization.
+Additionally you may want to enable the setting *create_target_if_missing*, if the target storage should be a file and it does not exist, yet. This option is currently no usable with a generic blockdevice or an LVM target.
