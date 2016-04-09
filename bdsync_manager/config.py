@@ -94,6 +94,9 @@ class TaskConfiguration(collections.UserDict):
         if self["connection_command"] and not self["remote_bdsync_bin"]:
             raise TaskSettingsError("The setting 'remote_bdsync_bin' is required if "
                                     "'connection_command' is defined.")
+        if not self["apply_patch_in_place"] and not self["target_patch_dir"]:
+            raise TaskSettingsError("Missing 'target_patch_dir' setting (while "
+                                    "'apply_patch_in_place' is disabled).")
         if "lvm" in self:
             if not os.path.exists(self["lvm"]["program_path"]):
                 raise TaskSettingsError("Failed to find 'lvm' executable (lvm_program_path='{0}')"
@@ -107,7 +110,7 @@ class TaskConfiguration(collections.UserDict):
             if not os.path.exists(os.path.dirname(self["target_path"])):
                 raise TaskSettingsError("The directory of the local target (target_path={0}) does "
                                         "not exist".format(self["target_path"]))
-            if not os.path.isdir(self["target_patch_dir"]):
+            if self["target_patch_dir"] and not os.path.isdir(self["target_patch_dir"]):
                 raise TaskSettingsError("The patch directory of the local target "
                                         "(target_patch_dir={0}) does not exist"
                                         .format(self["target_patch_dir"]))
