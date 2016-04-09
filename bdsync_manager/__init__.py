@@ -32,6 +32,11 @@ class TaskProcessingError(BDSyncManagerError):
     pass
 
 
+class NotFoundError(BDSyncManagerError):
+    """ any kind of ressource was not foun """
+    pass
+
+
 class TaskSettingsError(BDSyncManagerError):
     """ the configuration file contains invalid settings """
     pass

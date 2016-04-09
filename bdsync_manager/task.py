@@ -22,7 +22,7 @@ import datetime
 import shlex
 import time
 
-from bdsync_manager import TaskProcessingError
+from bdsync_manager import TaskProcessingError, NotFoundError
 from bdsync_manager.utils import get_command_from_tokens, get_tempfile, sizeof_fmt, log
 
 
@@ -153,8 +153,8 @@ def bdsync_run(source_filename, target_filename, connection_command, local_bdsyn
             log.warning("Creating missing target file: %s", target)
             target.create_empty()
         else:
-            raise TaskProcessingError("The target does not exist (while "
-                                      "'create_target_if_missing' is disabled)")
+            raise NotFoundError("The target does not exist (while 'create_target_if_missing' "
+                                "is disabled)")
     generate_patch_cmd = source.get_generate_patch_command(target)
     if apply_in_place:
         start_time = time.time()

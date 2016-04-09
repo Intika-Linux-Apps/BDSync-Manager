@@ -22,7 +22,7 @@ import os
 
 import plumbum
 
-import bdsync_manager
+from bdsync_manager import NotFoundError, RequirementsError
 from bdsync_manager.utils import log
 
 
@@ -46,8 +46,8 @@ class Caller:
         try:
             self("version")
         except plumbum.CommandNotFound:
-            raise bdsync_manager.RequirementsError("Failed to run LVM ({path}): command not found"
-                                                   .format(path=self._exec_path))
+            raise RequirementsError("Failed to run LVM ({path}): command not found"
+                                    .format(path=self._exec_path))
 
 
 class Volume:
