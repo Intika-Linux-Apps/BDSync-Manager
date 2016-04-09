@@ -83,10 +83,7 @@ class Volume:
     def remove_snapshot(self):
         assert self._snapshot_name is not None
         log.info("Removing LVM snapshot: %s/%s", self._group, self._snapshot_name)
-        # TODO: replace dummy operation
-        #cmd = self._caller["lvremove", "--force", "%s/%s" % (self._group, self._snapshot_name)]
-        cmd = plumbum.local["echo"]["lvremove", "--force",
-                                    "{vg}/{lv}".format(vg=self._group, lv=self._snapshot_name)]
+        cmd = self._caller["lvremove", "--force", "%s/%s" % (self._group, self._snapshot_name)]
         log.debug("LVM snapshot remove command: %s", " ".join(cmd.formulate()))
         cmd()
         self._snapshot_name = None
