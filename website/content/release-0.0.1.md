@@ -1,4 +1,7 @@
 Title: bdsync-manager v0.0.1 released
+Date: 2015-08-23
+Authors: Lars Kruse
+Category: Release
 
 
 This is the first release of the *bdsync-manager* software.

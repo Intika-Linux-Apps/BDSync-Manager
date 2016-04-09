@@ -20,7 +20,21 @@ Please note that you also need *bdsync* available on the target host for all rem
 
 ## Installation ##
 
-1. download and install the requirements (see above)
-2. clone the *bdsync-manager* repository or download and extract a release archive
-3. (optional) symlink or copy *bdsync-manager* to a path used for executables (e.g. */usr/local/bin/bdsync-manager*)
-4. create a configuration file (see below)
+### Release archive ###
+
+1. Download and install the requirements (see above)
+2. Download and extract the latest release: http://download.savannah.gnu.org/releases/bdsync-manager/
+3. Run *./bdsync-manager* from within this directory or specify the full path when calling the program
+
+
+### From git-checkout ###
+
+1. Download and install the requirements (see above)
+2. Clone the *bdsync-manager* repository or download and extract a release archive
+3. Run *./bdsync-manager* from within this directory or specify the full path when calling the program
+
+
+### pip - Python package manager ###
+
+1. *pip install bdsync*
+2. Run *bdsync-manager*
