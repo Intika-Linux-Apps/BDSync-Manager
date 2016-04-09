@@ -149,7 +149,7 @@ def bdsync_run(source_filename, target_filename, connection_command, local_bdsyn
     # preparations
     if not target.exists():
         if create_if_missing:
-            log.warning("Creating missing target file: %s", target)
+            log.warning("Creating missing target file: %s", target.filename)
             target.create_empty()
         else:
             raise NotFoundError("The target does not exist (while 'create_target_if_missing' "

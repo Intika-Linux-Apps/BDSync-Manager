@@ -82,7 +82,7 @@ class Volume:
         log.info("Creating LVM snapshot: %s/%s", self._group, snapshot_name)
         cmd = self._caller["lvcreate", "--snapshot", "--name", snapshot_name,
                            "--size", snapshot_size, self._get_path()]
-        log.debug("LVM snapshot create command: %s", " ".join(cmd.formulate()))
+        log.debug("LVM snapshot create command: %s", cmd)
         cmd()
         self._snapshot_name = snapshot_name
 
