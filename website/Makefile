@@ -8,6 +8,8 @@ OUTPUTDIR=$(BASEDIR)/output
 THEMEDIR=$(BASEDIR)/theme
 CONFFILE=$(BASEDIR)/pelicanconf.py
 
+CVS_UNTRACKED_FILES = $(shell cd "$(OUTPUTDIR)"; cvs -nq update 2>/dev/null | grep '^?' | cut -f 2- -d " ")
+
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)
@@ -50,4 +52,4 @@ cvs-checkout:
 	mv bdsync-manager "$(OUTPUTDIR)"
 
 cvs-publish:
-	cd "$(OUTPUTDIR)"; cvs commit
+	cd "$(OUTPUTDIR)"; cvs add $(CVS_UNTRACKED_FILES); cvs commit
