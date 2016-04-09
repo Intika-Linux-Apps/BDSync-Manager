@@ -91,6 +91,9 @@ def main():
         except bdsync_manager.TaskProcessingError as error:
             log.error(str(error))
             processing_error = True
+        except KeyboardInterrupt:
+            log.error("Terminated via user input")
+            return EXITCODE_CANCELLED
     if processing_error:
         return EXITCODE_TASK_PROCESSING_ERROR
     else:
