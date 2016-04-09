@@ -36,8 +36,7 @@ class Task:
             log.info("Skipping disabled task")
             return
         if "lvm" in self.settings:
-            lvm_volume = self.settings["lvm"]["caller"].get_volume(self.settings["lvm"]["vg_name"],
-                                                                   self.settings["source_path"])
+            lvm_volume = self.settings["lvm"]["caller"].get_volume(self.settings["source_path"])
             real_source = lvm_volume.get_snapshot(self.settings["lvm"]["snapshot_name"],
                                                   self.settings["lvm"]["snapshot_size"])
         else:

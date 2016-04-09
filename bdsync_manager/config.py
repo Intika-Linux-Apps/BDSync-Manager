@@ -102,12 +102,6 @@ class TaskConfiguration(collections.UserDict):
             if not LVM_SIZE_REGEX.match(self["lvm"]["snapshot_size"]):
                 raise TaskSettingsError("Invalid LVM snapshot size ({0})"
                                         .format(self["lvm"]["snapshot_size"]))
-            vg_name = self["lvm"]["caller"]("lvs", "--noheadings", "--options", "vg_name",
-                                            self["source_path"]).strip()
-            if not vg_name:
-                raise TaskSettingsError("Failed to discover the name of the Volume Group of "
-                                        "'{0}' via 'lvs'".format(self["source_path"]))
-            self["lvm"]["vg_name"] = vg_name
         if not self["connection_command"]:
             # local transfer
             if not os.path.exists(os.path.dirname(self["target_path"])):

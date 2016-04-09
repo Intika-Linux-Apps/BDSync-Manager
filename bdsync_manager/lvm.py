@@ -32,8 +32,8 @@ class Caller:
         self._exec_path = exec_path
         self._check_path()
 
-    def get_volume(self, group, volume):
-        return Volume(self, group, volume)
+    def get_volume(self, volume_path):
+        return Volume(self, volume_path)
 
     def __getitem__(self, args):
         """ provide a prepare/call interface similar to plumbum's """
@@ -52,19 +52,30 @@ class Caller:
 
 class Volume:
 
-    def __init__(self, caller, group, volume):
+    def __init__(self, caller, volume_path):
         self._caller = caller
-        self._group = group
-        self._volume = volume
+        self._group, self._volume = self._parse_volume_path(volume_path)
         self._snapshot_name = None
+
+    def _parse_volume_path(self, volume_path):
+        lvm_info_args = ("lvdisplay", "--columns", "--noheading", "--separator", ":",
+                         "-o", "vg_name,lv_name", volume_path)
+        cmd = self._caller[lvm_info_args]
+        log.debug("Trying to parse LVM volume information: %s", cmd)
+        # remove left alignment and the linebreak
+        output = cmd().strip()
+        if output:
+            vg_name, lv_name = output.split(":")
+            log.debug("Parsed LVM volume information: %s/%s", vg_name, lv_name)
+            return vg_name, lv_name
+        else:
+            raise NotFoundError("Failed to find find given LVM volume: %s" % volume_path)
 
     def _get_path(self, volume=None):
         if volume is None:
             volume = self._volume
-        if os.path.isabs(volume):
-            return volume
-        else:
-            return "/dev/{vg_name}/{volume}".format(vg_name=self._group, volume=self._volume)
+        assert volume
+        return "/dev/{vg_name}/{volume}".format(vg_name=self._group, volume=volume)
 
     def _create_snapshot(self, snapshot_name, snapshot_size):
         assert self._snapshot_name is None
