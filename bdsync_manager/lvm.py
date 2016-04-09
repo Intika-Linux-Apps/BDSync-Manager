@@ -92,9 +92,17 @@ class Volume:
         return self._get_path(self._snapshot_name)
 
     def remove_snapshot(self):
-        assert self._snapshot_name is not None
-        log.info("Removing LVM snapshot: %s/%s", self._group, self._snapshot_name)
-        cmd = self._caller["lvremove", "--force", "%s/%s" % (self._group, self._snapshot_name)]
-        log.debug("LVM snapshot remove command: %s", " ".join(cmd.formulate()))
-        cmd()
-        self._snapshot_name = None
+        # the name should not be None or empty
+        assert self._snapshot_name
+        lv_path = "%s/%s" % (self._group, self._snapshot_name)
+        log.debug("Verifying status of snapshot volume before removing: %s", lv_path)
+        cmd = self._caller["lvdisplay", "--columns", "--noheading",
+                           "--select", "origin=%s" % self._volume, lv_path]
+        if not self._snapshot_name in cmd():
+            log.error("Refusing to remove LVM snapshot due to its unclear state: %s", lv_path)
+        else:
+            log.info("Removing LVM snapshot: %s", lv_path)
+            cmd = self._caller["lvremove", "--force", lv_path]
+            log.debug("LVM snapshot remove command: %s", cmd)
+            cmd()
+            self._snapshot_name = None
