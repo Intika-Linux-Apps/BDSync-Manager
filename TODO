@@ -1,0 +1,15 @@
+= Wishlist items / future wild plans =
+
+* add a man page
+* add tests
+* seaparate "bsync_args" for local and remote execution
+** e.g. "--blocksize" is allowed only for the local client
+* synchronize all volumes of an LVM volume group
+* use a template syntax for simplifiying repetitive source/target definitions
+* apply lvresize for target LVM volumes
+* visualize progress (requires status output from bdsync)
+* mix command line arguments into the settings from the config file
+** maybe "cliapp" would help here?
+* store patches remotely instead of applying them (for incremental backups)
+* add "verify" operation
+* research if LVM offers a change journal for quicker synchronization
