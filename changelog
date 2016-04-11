@@ -1,5 +1,7 @@
 Version 0.2 - 2016-04-??
-* allow "apply_patch_in_place" without storing the patch in between
+* allow "apply_patch_in_place"
+** the binary patch is not stored but applied directly on the fly
+* LVM: replaced dummy "lvremove" operation with careful deletion
 
 Version 0.1 - 2016-04-05
 * interprete '~' in most path settings
