@@ -3,11 +3,14 @@
 * introduce and test interesting features
 * increase VERSION in bdsync_manager/__init__.py
 * update the changelog
+* create a release announcement (website/content/release-X.Y.md)
+* commit the above release information changes
+* set a release tag: git tag -a vX.Y [COMMIT_ID]
+* create a signed release archive: make sign
 * upload to savannah: make upload
 * upload to pypi: make pypi-upload
-* add release announcement to website:
-** create a release announcement (website/content/release-X.Y.md)
-** make website-upload
+* add release announcement to website: make website-upload
 * add a release announcement to the savannah project website
 * send a release announcement to the mailing list
-* set a release tag: git tag -a vX.Y COMMIT_ID
+* add and commit the release archive (and the signature)
+* push all changes

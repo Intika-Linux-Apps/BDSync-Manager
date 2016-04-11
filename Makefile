@@ -5,12 +5,13 @@
 
 
 RELEASE_DIR = releases
-RELEASE_PREFIX = $(RELEASE_DIR)/bdsync-manager_
+RELEASE_PREFIX = bdsync-manager-
 # read the latest "Release" line from the changelog
 VERSION = $(shell grep -w "^Version" changelog | head -1 | awk '{print $$2}')
-RELEASE_ARCHIVE_FILE = $(RELEASE_PREFIX)$(VERSION).tar.gz
+RELEASE_ARCHIVE_FILE = $(RELEASE_DIR)/$(RELEASE_PREFIX)$(VERSION).tar.gz
 RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
+PYTHON_BUILD_DIRS = bdsync_manager.egg-info build dist
 
 RM ?= rm -f
 SETUPTOOLS ?= python3 setup.py
@@ -18,21 +19,32 @@ SETUPTOOLS ?= python3 setup.py
 
 .PHONY: release sign upload pypi-upload website website-upload clean
 
-
-release: $(RELEASE_ARCHIVE_FILE)
+help:
+	@echo "Available targets:"
+	@echo "		sign		- create a signature for a release archive"
+	@echo "		release		- create a release archive"
+	@echo "		pypi-upload	- upload the Python package to the Python Package Index (pypi)"
+	@echo "		website		- create the html output of the website"
+	@echo "		website-upload	- upload the website to savannah"
+	@echo "		check		- run the pylint style checker"
+	@echo "		clean		- remove temporary files"
 
 sign: $(RELEASE_SIGNATURE_FILE)
+
+release: $(RELEASE_ARCHIVE_FILE)
 
 upload: sign release
 	@[ -z "$(UPLOAD_USER)" ] && { echo >&2 "ERROR: Missing savannah user name for upload:\n	make upload UPLOAD_USER=foobar"; exit 1; } || true
 	rsync -a "$(RELEASE_ARCHIVE_FILE)" "$(UPLOAD_TARGET)/"
 	rsync -a "$(RELEASE_SIGNATURE_FILE)" "$(UPLOAD_TARGET)/"
 
-$(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE)
+$(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE) Makefile
 	gpg --detach-sign --use-agent "$<"
 
-$(RELEASE_ARCHIVE_FILE):
-	tar czf "$(RELEASE_ARCHIVE_FILE)" --exclude-vcs --exclude=$(RELEASE_DIR) .
+$(RELEASE_ARCHIVE_FILE): Makefile
+	# verify that the given version exists
+	git tag | grep -qwF "v$(VERSION)"
+	git archive --prefix=$(RELEASE_PREFIX)$(VERSION)/ --output=$@ v$(VERSION)
 
 pypi-upload: sign release
 	$(SETUPTOOLS) sdist upload
@@ -51,4 +63,4 @@ check:
 clean:
 	$(MAKE) -C website clean
 	# python build directories
-	$(RM) -r bdsync_manager.egg-info build dist
+	$(RM) -r $(PYTHON_BUILD_DIRS)
