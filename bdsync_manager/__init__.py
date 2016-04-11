@@ -33,7 +33,7 @@ class TaskProcessingError(BDSyncManagerError):
 
 
 class NotFoundError(BDSyncManagerError):
-    """ any kind of ressource was not foun """
+    """ any kind of ressource was not found """
     pass
 
 
