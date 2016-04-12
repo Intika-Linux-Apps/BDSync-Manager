@@ -22,7 +22,7 @@ import datetime
 import shlex
 import time
 
-from bdsync_manager import TaskProcessingError, NotFoundError
+from bdsync_manager import NotFoundError
 from bdsync_manager.utils import get_command_from_tokens, get_tempfile, sizeof_fmt, log
 
 
@@ -95,8 +95,9 @@ class SyncTarget:
 
     def get_apply_patch_command(self, patch=None):
         # by default: read from stdin
-        patch_command = get_command_from_tokens([self._bdsync_bin] + self._bdsync_arg_tokens + ["--patch"])
-        if not patch is None:
+        patch_command = get_command_from_tokens([self._bdsync_bin] + self._bdsync_arg_tokens +
+                                                ["--patch"])
+        if patch is not None:
             patch_command = patch_command < patch.filename
         if self._connection_tokens:
             remote_cmd_args = self._connection_tokens + [patch_command]

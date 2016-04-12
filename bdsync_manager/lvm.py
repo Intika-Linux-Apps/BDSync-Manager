@@ -18,8 +18,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
-
 import plumbum
 
 from bdsync_manager import NotFoundError, RequirementsError
@@ -98,7 +96,7 @@ class Volume:
         log.debug("Verifying status of snapshot volume before removing: %s", lv_path)
         cmd = self._caller["lvdisplay", "--columns", "--noheading",
                            "--select", "origin=%s" % self._volume, lv_path]
-        if not self._snapshot_name in cmd():
+        if self._snapshot_name not in cmd():
             log.error("Refusing to remove LVM snapshot due to its unclear state: %s", lv_path)
         else:
             log.info("Removing LVM snapshot: %s", lv_path)
