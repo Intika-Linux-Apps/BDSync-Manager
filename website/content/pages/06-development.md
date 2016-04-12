@@ -1,12 +1,15 @@
 Title: Development
 
+*bdsync-manager* is hosted on [Savannah](https://savannah.nongnu.org/) kindly provided by the [GNU folks](http://gnu.org/).
+
+The [project page of bdsync-manager](https://savannah.nongnu.org/projects/bdsync-manager/) provides all development tools.
+
+
 ## Get the sources ##
 
-*bdsync-manager* is kindly hosted by [savannah.nongnu.org](https://savannah.nongnu.org/projects/bdsync-manager/).
+Take a look at the [code repository](https://savannah.nongnu.org/git/?group=bdsync-manager) or check it out anonymously:
 
-Code repository:
-
-    https://savannah.nongnu.org/git/?group=bdsync-manager
+    git clone git://git.savannah.nongnu.org/bdsync-manager.git
 
 
 ## Mailinglist ##
