@@ -52,4 +52,4 @@ cvs-checkout:
 	mv bdsync-manager "$(OUTPUTDIR)"
 
 cvs-publish:
-	cd "$(OUTPUTDIR)"; cvs add $(CVS_UNTRACKED_FILES); cvs commit
+	cd "$(OUTPUTDIR)"; [ -n "$(CVS_UNTRACKED_FILES)" ] && cvs add $(CVS_UNTRACKED_FILES); cvs commit -m "update"
