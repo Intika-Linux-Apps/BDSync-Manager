@@ -22,7 +22,9 @@ import datetime
 import shlex
 import time
 
-from bdsync_manager import NotFoundError
+from plumbum import ProcessExecutionError
+
+from bdsync_manager import TaskProcessingError, NotFoundError
 from bdsync_manager.utils import get_command_from_tokens, get_tempfile, sizeof_fmt, log
 
 
@@ -47,6 +49,8 @@ class Task:
                        self.settings["remote_bdsync_bin"], self.settings["bdsync_args"],
                        self.settings["target_patch_dir"], self.settings["create_target_if_missing"],
                        self.settings["apply_patch_in_place"])
+        except ProcessExecutionError as exc:
+            raise TaskProcessingError("Failed to run command: {0}".format(exc))
         finally:
             if "lvm" in self.settings:
                 lvm_volume.remove_snapshot()

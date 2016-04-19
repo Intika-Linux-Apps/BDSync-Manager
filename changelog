@@ -1,3 +1,6 @@
+Version 0.3 - 2016-??-??
+* continue with the next task if program execution error occoured
+
 Version 0.2 - 2016-04-12
 * allow "apply_patch_in_place"
 ** the binary patch is not stored but applied directly on the fly
