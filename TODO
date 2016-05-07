@@ -13,3 +13,4 @@
 * store patches remotely instead of applying them (for incremental backups)
 * add "verify" operation
 * research if LVM offers a change journal for quicker synchronization
+* specify order of tasks (currently: random)
