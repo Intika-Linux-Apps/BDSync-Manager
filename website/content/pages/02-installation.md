@@ -30,7 +30,7 @@ Please note that you also need *bdsync* available on the target host for all rem
 ### From git-checkout ###
 
 1. Download and install the requirements (see above)
-2. Clone the *bdsync-manager* repository or download and extract a release archive
+2. Clone the *bdsync-manager* [repository](./development.html) or download and extract a release archive
 3. Run *./bdsync-manager* from within this directory or specify the full path when calling the program
 
 
