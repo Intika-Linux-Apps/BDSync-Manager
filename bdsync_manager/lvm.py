@@ -20,7 +20,7 @@
 
 import plumbum
 
-from bdsync_manager import NotFoundError, RequirementsError
+from bdsync_manager import NotFoundError, RequirementsError, TaskProcessingError
 from bdsync_manager.utils import log
 
 
@@ -81,7 +81,10 @@ class Volume:
         cmd = self._caller["lvcreate", "--snapshot", "--name", snapshot_name,
                            "--size", snapshot_size, self._get_path()]
         log.debug("LVM snapshot create command: %s", cmd)
-        cmd()
+        try:
+            cmd()
+        except plumbum.commands.processes.ProcessExecutionError as exc:
+            raise TaskProcessingError("Failed to create LVM snapshot: {0}".format(exc))
         self._snapshot_name = snapshot_name
 
     def get_snapshot(self, snapshot_name, snapshot_size):
