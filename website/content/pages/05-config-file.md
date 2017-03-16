@@ -39,10 +39,12 @@ This setting simplifies the initial run of a backup.
 
 This setting is optional and defaults to *False*.
 
-### apply_path_in_place ###
+### apply_patch_in_place ###
 Instead of storing a binary patch on the target site and applying it afterward, the process is reduced to a single in-place operation.
 
 This will leave a corrupt or inconsistent image behind if the operation is interrupted. Thus this setting is only recommended for the first initial transfer of a blockdevice.
+
+This setting is optional and defaults to *False*.
 
 ## bdsync-related settings ##
 ### local_bdsync_bin ###
