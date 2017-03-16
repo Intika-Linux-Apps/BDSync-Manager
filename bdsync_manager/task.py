@@ -150,7 +150,9 @@ def bdsync_run(source_filename, target_filename, connection_command, local_bdsyn
         by the application of the patch.
     """
     source = SyncSource(source_filename, local_bdsync, bdsync_args)
-    target = SyncTarget(target_filename, remote_bdsync, bdsync_args, connection_command)
+    target = SyncTarget(target_filename,
+                        remote_bdsync if connection_command else local_bdsync,
+                        bdsync_args, connection_command)
     # preparations
     if not target.exists():
         if create_if_missing:
