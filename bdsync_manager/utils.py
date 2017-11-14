@@ -93,7 +93,7 @@ def parse_bandwidth_limit(text):
     if match:
         data = match.groupdict()
         unit_factor = {None: 1, "k": 1024, "m": 1024 ** 2, "g": 1024 ** 3}[data["unit"]]
-        byte_count = data["count"] * unit_factor
+        byte_count = int(data["count"]) * unit_factor
         if byte_count == 0:
             raise ValueError("the limit must be positive (non-zero)")
         else:

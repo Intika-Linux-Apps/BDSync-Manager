@@ -25,7 +25,8 @@ import time
 from plumbum import ProcessExecutionError
 
 from bdsync_manager import TaskProcessingError, NotFoundError
-from bdsync_manager.utils import get_command_from_tokens, get_tempfile, sizeof_fmt, log
+from bdsync_manager.utils import (get_command_from_tokens, get_tempfile, log,
+                                  parse_bandwidth_limit, sizeof_fmt)
 
 
 class Task:

@@ -26,7 +26,7 @@ import re
 
 import bdsync_manager.lvm
 from bdsync_manager import TaskSettingsError
-from bdsync_manager.utils import log
+from bdsync_manager.utils import log, parse_bandwidth_limit
 
 
 LVM_SIZE_REGEX = re.compile(r"^[0-9]+[bBsSkKmMgGtTpPeE]?$")
