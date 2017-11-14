@@ -69,6 +69,7 @@ class TaskConfiguration(collections.UserDict):
             self["connection_command"] = config.get("connection_command", None)
             self["target_patch_dir"] = config.get("target_patch_dir", None)
             self["create_target_if_missing"] = config.getboolean("create_target_if_missing", False)
+            self["bandwidth_limit"] = config.get("bandwidth_limit", None)
             lvm_snapshot_enabled = config.getboolean("lvm_snapshot_enabled", False)
             if lvm_snapshot_enabled:
                 self["lvm"] = {"snapshot_size": config["lvm_snapshot_size"],
@@ -97,6 +98,16 @@ class TaskConfiguration(collections.UserDict):
         if not self["apply_patch_in_place"] and not self["target_patch_dir"]:
             raise TaskSettingsError("Missing 'target_patch_dir' setting (while "
                                     "'apply_patch_in_place' is disabled).")
+        if self["bandwidth_limit"]:
+            try:
+                value = parse_bandwidth_limit(self["bandwidth_limit"])
+            except ValueError as exc:
+                raise TaskSettingsError("Failed to parse 'bandwidth_limit' ({}): {}"
+                                        .format(self["bandwidth_limit"], exc))
+            self["bandwidth_limit"] = value
+        else:
+            # an empty string is interpreted as no limit
+            self["bandwidth_limit"] = None
         if "lvm" in self:
             if not os.path.exists(self["lvm"]["program_path"]):
                 raise TaskSettingsError("Failed to find 'lvm' executable (lvm_program_path='{0}')"

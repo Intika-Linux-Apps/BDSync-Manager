@@ -19,6 +19,7 @@
 """
 
 import logging
+import re
 
 try:
     import plumbum
@@ -27,6 +28,9 @@ except ImportError:
     pass
 
 from bdsync_manager import RequirementsError
+
+
+BANDWITH_REGEX = re.compile(r"^(?P<count>[0-9]+)(?P<unit>[bkmg])?$")
 
 
 def __get_logger():
@@ -82,6 +86,20 @@ def verify_requirements():
 def get_command_from_tokens(tokens):
     """ turn a list of command + arguments into a plumbum command """
     return plumbum.local[tokens[0]][tuple(tokens[1:])]
+
+
+def parse_bandwidth_limit(text):
+    match = BANDWITH_REGEX.match(text.lower())
+    if match:
+        data = match.groupdict()
+        unit_factor = {None: 1, "k": 1024, "m": 1024 ** 2, "g": 1024 ** 3}[data["unit"]]
+        byte_count = data["count"] * unit_factor
+        if byte_count == 0:
+            raise ValueError("the limit must be positive (non-zero)")
+        else:
+            return byte_count
+    else:
+        raise ValueError("failed to parse bandwidth limit (expected something like '42m')")
 
 
 log = __get_logger()

@@ -33,6 +33,7 @@ disabled = True
 source_path = /dev/lvm-foo/example-home
 target_path = /dev/lvm-backups/foo-home
 connection_command = ssh foo-backup@failover.example.org
+bandwidth_limit = 1M
 # LVM blockdevices may differ in size (due to the configured extent size).
 # You need to make sure on your own that the target is bigger than the source.
 bdsync_args = --diffsize=minsize

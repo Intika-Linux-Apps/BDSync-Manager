@@ -46,6 +46,12 @@ This will leave a corrupt or inconsistent image behind if the operation is inter
 
 This setting is optional and defaults to *False*.
 
+### bandwidth_limit ###
+Limit the speed of the patch transfer to the destination. This requires the program *pv* to be installed locally. The bandwidth limit can be suffixed with either *b*, *k*, *m* or *g* (case independant) denoting the bytes, kibibytes (1024), mebibytes and so on.
+
+This setting is optional. The default value is empty.
+
+
 ## bdsync-related settings ##
 ### local_bdsync_bin ###
 The location of the local *bdsync* binary (e.g. */usr/local/bin/bdsync*).

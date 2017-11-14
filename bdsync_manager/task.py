@@ -48,7 +48,7 @@ class Task:
                        self.settings["connection_command"], self.settings["local_bdsync_bin"],
                        self.settings["remote_bdsync_bin"], self.settings["bdsync_args"],
                        self.settings["target_patch_dir"], self.settings["create_target_if_missing"],
-                       self.settings["apply_patch_in_place"])
+                       self.settings["apply_patch_in_place"], self.settings["bandwidth_limit"])
         except ProcessExecutionError as exc:
             raise TaskProcessingError("Failed to run command: {0}".format(exc))
         finally:
@@ -144,7 +144,8 @@ class SyncPatch:
 
 
 def bdsync_run(source_filename, target_filename, connection_command, local_bdsync,
-               remote_bdsync, bdsync_args, target_patch_dir, create_if_missing, apply_in_place):
+               remote_bdsync, bdsync_args, target_patch_dir, create_if_missing, apply_in_place,
+               bandwidth_limit):
     """ Run bdsync in one or two phases. With one phase changes are applied in-place.
         With two phases there are separate stages of patch generation / transfer followed
         by the application of the patch.
@@ -162,6 +163,9 @@ def bdsync_run(source_filename, target_filename, connection_command, local_bdsyn
             raise NotFoundError("The target does not exist (while 'create_target_if_missing' "
                                 "is disabled)")
     generate_patch_cmd = source.get_generate_patch_command(target)
+    if bandwidth_limit:
+        generate_patch_cmd = generate_patch_cmd | get_command_from_tokens(
+            ["pv", "--rate-limit", str(bandwidth_limit), "--quiet"])
     if apply_in_place:
         start_time = time.time()
         operation = generate_patch_cmd | target.get_apply_patch_command()
