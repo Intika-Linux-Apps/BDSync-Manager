@@ -28,7 +28,7 @@ help:
 	@echo "	pypi-upload	- upload the Python package to the Python Package Index (pypi)"
 	@echo "	website		- create the html output of the website"
 	@echo "	website-upload	- upload the website to savannah"
-	@echo "	check		- run the pylint style checker"
+	@echo "	test		- run code style checks"
 	@echo "	clean		- remove temporary files"
 	@echo
 
@@ -57,11 +57,6 @@ website:
 
 website-upload: website
 	$(MAKE) -C website cvs-publish
-
-check:
-	@# The exitcode of pylint is a bit pattern based on the severity of the issues, e.g.:
-	@#   0x20 = syntax errors, 0x02 = error message, 0x01 = fatal message
-	pylint3 bdsync_manager || [ "$$(( $$? & 0x23 ))" -eq 0 ]
 
 clean:
 	$(MAKE) -C website clean
