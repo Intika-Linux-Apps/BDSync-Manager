@@ -1,12 +1,14 @@
-Version 0.3 - 2016-??-??
+Version 0.3.0 - 2017-11-19
 * continue with the next task if program execution error occoured
+* add deb packaging
+* configurable bandwidth limitation (via pv)
 
-Version 0.2 - 2016-04-12
+Version 0.2.0 - 2016-04-12
 * allow "apply_patch_in_place"
 ** the binary patch is not stored but applied directly on the fly
 * LVM: replaced dummy "lvremove" operation with careful deletion
 
-Version 0.1 - 2016-04-05
+Version 0.1.0 - 2016-04-05
 * interprete '~' in most path settings
 * add 'create_target_if_missing' option
 
