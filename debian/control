@@ -1,0 +1,24 @@
+Source: bdsync-manager
+Section: utils
+Priority: optional
+Maintainer: Lars Kruse <devel@sumpfralle.de>
+Build-Depends: debhelper (>= 9), dh-python, python3-all, python3-setuptools
+Standards-Version: 4.1.1
+Homepage: https://savannah.nongnu.org/projects/bdsync-manager/
+
+Package: bdsync-manager
+Architecture: all
+Depends: python3-plumbum, ${python3:Depends}, ${misc:Depends}
+Description: Synchronize remote blockdevices and images
+ bdsync-manager simplifies the synchronization of blockdevices.
+ It relies upon the highly efficient blockdevice synchronization tool bdsync.
+ .
+ bdsync-manager is for bdsync what rsnapshot is for rsync.
+ .
+ The following features are supported:
+    * Synchronize one or more blockdevices to a local or remote target
+      (as a file or blockdevice)
+    * use LVM snapshots for a consistent synchronization (optional)
+    * output some statistics
+ .
+ bdsync-manager is written in Python.

@@ -4,3 +4,11 @@ bdsync_manager.egg-info/
 dist/
 build/
 website/output
+
+debian/debhelper-*-stamp
+debian/files
+debian/tmp/
+debian/*.debhelper.log
+debian/*.debhelper
+debian/*.substvars
+debian/bdsync-manager/
