@@ -3,6 +3,7 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
+include makefilet-download-ondemand.mk
 
 RELEASE_DIR = releases
 RELEASE_PREFIX = bdsync-manager-
@@ -13,11 +14,12 @@ RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
 PYTHON_BUILD_DIRS = bdsync_manager.egg-info build dist
 
-RM ?= rm -f
 SETUPTOOLS ?= python3 setup.py
 
 
 .PHONY: release sign upload pypi-upload website website-upload clean
+
+default-target: help
 
 help:
 	@echo "Available targets for bdsync-manager:"
