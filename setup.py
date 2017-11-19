@@ -1,4 +1,3 @@
-import os
 from setuptools import setup
 from bdsync_manager import VERSION
 

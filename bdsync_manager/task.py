@@ -25,8 +25,7 @@ import time
 from plumbum import ProcessExecutionError
 
 from bdsync_manager import TaskProcessingError, NotFoundError
-from bdsync_manager.utils import (get_command_from_tokens, get_tempfile, log,
-                                  parse_bandwidth_limit, sizeof_fmt)
+from bdsync_manager.utils import get_command_from_tokens, get_tempfile, log, sizeof_fmt
 
 
 class Task:
@@ -48,7 +47,8 @@ class Task:
             bdsync_run(real_source, self.settings["target_path"],
                        self.settings["connection_command"], self.settings["local_bdsync_bin"],
                        self.settings["remote_bdsync_bin"], self.settings["bdsync_args"],
-                       self.settings["target_patch_dir"], self.settings["create_target_if_missing"],
+                       self.settings["target_patch_dir"],
+                       self.settings["create_target_if_missing"],
                        self.settings["apply_patch_in_place"], self.settings["bandwidth_limit"])
         except ProcessExecutionError as exc:
             raise TaskProcessingError("Failed to run command: {0}".format(exc))

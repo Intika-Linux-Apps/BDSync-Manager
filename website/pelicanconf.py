@@ -40,8 +40,6 @@ SUMMARY_MAX_LENGTH = 500
 # Uncomment following line if you want document-relative URLs when developing
 RELATIVE_URLS = True
 
-#THEME = "notmyidea-bdsync-manager"
-
 # we turn off some details
 DISPLAY_CATEGORIES_ON_MENU = False
 AUTHOR_SAVE_AS = ""

@@ -33,7 +33,7 @@ from bdsync_manager import RequirementsError
 BANDWITH_REGEX = re.compile(r"^(?P<count>[0-9]+)(?P<unit>[bkmg])?$")
 
 
-def __get_logger():
+def _get_logger():
     """ retrieve the configured logger for bdsync-manager """
     try:
         return log
@@ -49,7 +49,7 @@ def set_log_format(fmt=None, logger=None):
     if fmt is None:
         fmt = "[bdsync-manager] %(asctime)s - %(message)s"
     if logger is None:
-        logger = __get_logger()
+        logger = _get_logger()
     logger.handlers[-1].setFormatter(logging.Formatter(fmt))
 
 
@@ -78,7 +78,7 @@ def verify_requirements():
         @raises RequirementsError
     """
     try:
-        import plumbum as foo
+        import plumbum  # noqa F401
     except ImportError:
         raise RequirementsError("Failed to import the required python module 'plumbum'")
 
@@ -102,4 +102,4 @@ def parse_bandwidth_limit(text):
         raise ValueError("failed to parse bandwidth limit (expected something like '42m')")
 
 
-log = __get_logger()
+log = _get_logger()
