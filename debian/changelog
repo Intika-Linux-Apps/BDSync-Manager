@@ -1,3 +1,9 @@
+bdsync-manager (0.3.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Lars Kruse <devel@sumpfralle.de>  Sun, 19 Nov 2017 19:16:54 +0100
+
 bdsync-manager (0.2.0-1) unstable; urgency=medium
 
   * Initial release
