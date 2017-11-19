@@ -8,7 +8,7 @@ include makefilet-download-ondemand.mk
 RELEASE_DIR = releases
 RELEASE_PREFIX = bdsync-manager-
 # read the latest "Release" line from the changelog
-VERSION = $(shell grep -w "^Version" changelog | head -1 | awk '{print $$2}')
+VERSION = $(shell cat VERSION)
 RELEASE_ARCHIVE_FILE = $(RELEASE_DIR)/$(RELEASE_PREFIX)$(VERSION).tar.gz
 RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
