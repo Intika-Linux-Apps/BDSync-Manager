@@ -6,10 +6,11 @@
 include makefilet-download-ondemand.mk
 
 RELEASE_DIR = releases
-RELEASE_PREFIX = bdsync-manager-
+RELEASE_PREFIX = bdsync-manager
 # read the latest "Release" line from the changelog
 VERSION = $(shell cat VERSION)
-RELEASE_ARCHIVE_FILE = $(RELEASE_DIR)/$(RELEASE_PREFIX)$(VERSION).tar.gz
+RELEASE_ARCHIVE_FILE = $(RELEASE_DIR)/$(RELEASE_PREFIX)-$(VERSION).tar.gz
+RELEASE_DEB_FILE = $(RELEASE_DIR)/$(RELEASE_PREFIX)_$(VERSION)-1_all.deb
 RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
 PYTHON_BUILD_DIRS = bdsync_manager.egg-info build dist
@@ -48,8 +49,7 @@ $(MANPAGE): Makefile bdsync-manager.help2man.include
 
 upload: sign release
 	@[ -z "$(UPLOAD_USER)" ] && { echo >&2 "ERROR: Missing savannah user name for upload:\n	make upload UPLOAD_USER=foobar"; exit 1; } || true
-	rsync -a "$(RELEASE_ARCHIVE_FILE)" "$(UPLOAD_TARGET)/"
-	rsync -a "$(RELEASE_SIGNATURE_FILE)" "$(UPLOAD_TARGET)/"
+	rsync -a "$(RELEASE_ARCHIVE_FILE)" "$(RELEASE_SIGNATURE_FILE)" "$(RELEASE_DEB_FILE)" "$(UPLOAD_TARGET)/"
 
 $(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE) Makefile
 	gpg --detach-sign --use-agent "$<"
@@ -57,7 +57,10 @@ $(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE) Makefile
 $(RELEASE_ARCHIVE_FILE): Makefile
 	# verify that the given version exists
 	git tag | grep -qwF "v$(VERSION)"
-	git archive --prefix=$(RELEASE_PREFIX)$(VERSION)/ --output=$@ v$(VERSION)
+	git archive --prefix=$(RELEASE_PREFIX)-$(VERSION)/ --output=$@ v$(VERSION)
+
+$(RELEASE_DEB_FILE): Makefile dist-deb
+	mv "$(DIR_DEBIAN_BUILD)/$(notdir $@)" "$@"
 
 pypi-upload: sign release
 	$(SETUPTOOLS) sdist upload
