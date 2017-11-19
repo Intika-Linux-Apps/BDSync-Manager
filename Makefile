@@ -18,6 +18,8 @@ MANPAGE = $(DIR_BUILD)/bdsync-manager.1
 
 SETUPTOOLS ?= python3 setup.py
 
+PYPI_UPLOAD_TARGET = pypi
+
 
 .PHONY: release sign upload pypi-upload website website-upload clean
 
