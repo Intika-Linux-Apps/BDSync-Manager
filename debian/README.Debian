@@ -1,0 +1,3 @@
+bdsync-manager uses by default the configuration file /etc/bdsync-manager.conf.
+Take a look at /usr/share/doc/bdsync-manager/examples/bdsync-manager.conf.sample
+for an exhaustive example.
