@@ -1,5 +1,6 @@
 .*.swp
 *.pyc
+.pybuild/
 bdsync_manager.egg-info/
 dist/
 build/
