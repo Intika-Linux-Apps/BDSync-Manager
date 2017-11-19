@@ -28,6 +28,7 @@ help:
 	@echo "	sign		- create a signature for a release archive"
 	@echo "	release		- create distributable files for a release"
 	@echo "	upload-python	- upload the Python package to the Python Package Index (pypi)"
+	@echo "	upload-savannah	- upload release files to the savannah hosting"
 	@echo "	website		- create the html output of the website"
 	@echo "	website-upload	- upload the website to savannah"
 	@echo "	test		- run code style checks"
@@ -47,8 +48,8 @@ $(MANPAGE): Makefile bdsync-manager.help2man.include
 	help2man --no-info --include bdsync-manager.help2man.include ./bdsync-manager >"$@.new"
 	mv "$@.new" "$@"
 
-upload: sign release
-	@[ -z "$(UPLOAD_USER)" ] && { echo >&2 "ERROR: Missing savannah user name for upload:\n	make upload UPLOAD_USER=foobar"; exit 1; } || true
+upload-savannah: sign release
+	@[ -z "$(UPLOAD_USER)" ] && { echo >&2 "ERROR: Missing savannah user name for upload:\n	make upload-savannah UPLOAD_USER=foobar"; exit 1; } || true
 	rsync -a "$(RELEASE_ARCHIVE_FILE)" "$(RELEASE_SIGNATURE_FILE)" "$(RELEASE_DEB_FILE)" "$(UPLOAD_TARGET)/"
 
 $(RELEASE_SIGNATURE_FILE): $(RELEASE_ARCHIVE_FILE) Makefile
