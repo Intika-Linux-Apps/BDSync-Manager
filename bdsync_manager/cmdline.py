@@ -35,13 +35,17 @@ EXITCODE_CANCELLED = 4
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Manage one or more bdsync transfers.")
+    parser = argparse.ArgumentParser(description="Manage one or more blockdevice transfers.")
     parser.add_argument("--log-level", dest="log_level", default="warning",
                         choices=("debug", "info", "warning", "error"), help="Output verbosity")
+    parser.add_argument("--version", action="version",
+                        version="%(prog)s {}".format(bdsync_manager.VERSION))
     parser.add_argument("--config", metavar="CONFIG_FILE", dest="config_file",
                         default="/etc/bdsync-manager.conf", type=argparse.FileType('r'),
                         help="Location of the config file")
-    parser.add_argument("--task", metavar="TASK_NAME", dest="tasks", action="append")
+    parser.add_argument("--task", metavar="TASK_NAME", dest="tasks", action="append",
+                        help="Optionally execute only one of the tasks described in the "
+                             "configuration")
     args = parser.parse_args()
     log_levels = {"debug": logging.DEBUG,
                   "info": logging.INFO,

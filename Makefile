@@ -13,6 +13,7 @@ RELEASE_ARCHIVE_FILE = $(RELEASE_DIR)/$(RELEASE_PREFIX)$(VERSION).tar.gz
 RELEASE_SIGNATURE_FILE = $(RELEASE_ARCHIVE_FILE).sig
 UPLOAD_TARGET = $(UPLOAD_USER)@dl.sv.nongnu.org:/releases/bdsync-manager
 PYTHON_BUILD_DIRS = bdsync_manager.egg-info build dist
+MANPAGE = $(DIR_BUILD)/bdsync-manager.1
 
 SETUPTOOLS ?= python3 setup.py
 
@@ -35,6 +36,15 @@ help:
 sign: $(RELEASE_SIGNATURE_FILE)
 
 release: $(RELEASE_ARCHIVE_FILE)
+
+build: manpages
+
+.PHONY: manpages
+manpages: $(MANPAGE)
+
+$(MANPAGE): Makefile bdsync-manager.help2man.include
+	help2man --no-info --include bdsync-manager.help2man.include ./bdsync-manager >"$@.new"
+	mv "$@.new" "$@"
 
 upload: sign release
 	@[ -z "$(UPLOAD_USER)" ] && { echo >&2 "ERROR: Missing savannah user name for upload:\n	make upload UPLOAD_USER=foobar"; exit 1; } || true

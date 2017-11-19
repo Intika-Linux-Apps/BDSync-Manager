@@ -1,0 +1,13 @@
+[FILES]
+.TP
+\fB/etc/bdsync-manager.conf\fR
+default location of the configuration file describing one or more tasks to be executed
+
+[AUTHOR]
+Written by Lars Kruse <devel@sumpfralle.de>
+
+[REPORTING BUGS]
+Report bugs via https://savannah.nongnu.org/support/?group=bdsync-manager&func=additem
+
+[SEE ALSO]
+bdsync-manager uses bdsync (https://github.com/TargetHolding/bdsync) for all low-level operations.

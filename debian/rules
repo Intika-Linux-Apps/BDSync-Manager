@@ -4,3 +4,7 @@ export PYBUILD_NAME=bdsync-manager
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_build:
+	$(MAKE) manpages
+	dh_auto_build

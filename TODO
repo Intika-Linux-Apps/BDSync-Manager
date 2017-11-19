@@ -2,7 +2,7 @@
 
 * add a man page
 * add tests
-* seaparate "bsync_args" for local and remote execution
+* seaparate "bdsync_args" for local and remote execution
 ** e.g. "--blocksize" is allowed only for the local client
 * synchronize all volumes of an LVM volume group
 * use a template syntax for simplifiying repetitive source/target definitions
