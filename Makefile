@@ -20,14 +20,15 @@ SETUPTOOLS ?= python3 setup.py
 .PHONY: release sign upload pypi-upload website website-upload clean
 
 help:
-	@echo "Available targets:"
-	@echo "		sign		- create a signature for a release archive"
-	@echo "		release		- create a release archive"
-	@echo "		pypi-upload	- upload the Python package to the Python Package Index (pypi)"
-	@echo "		website		- create the html output of the website"
-	@echo "		website-upload	- upload the website to savannah"
-	@echo "		check		- run the pylint style checker"
-	@echo "		clean		- remove temporary files"
+	@echo "Available targets for bdsync-manager:"
+	@echo "	sign		- create a signature for a release archive"
+	@echo "	release		- create a release archive"
+	@echo "	pypi-upload	- upload the Python package to the Python Package Index (pypi)"
+	@echo "	website		- create the html output of the website"
+	@echo "	website-upload	- upload the website to savannah"
+	@echo "	check		- run the pylint style checker"
+	@echo "	clean		- remove temporary files"
+	@echo
 
 sign: $(RELEASE_SIGNATURE_FILE)
 
