@@ -26,8 +26,8 @@ default-target: help
 help:
 	@echo "Available targets for bdsync-manager:"
 	@echo "	sign		- create a signature for a release archive"
-	@echo "	release		- create a release archive"
-	@echo "	pypi-upload	- upload the Python package to the Python Package Index (pypi)"
+	@echo "	release		- create distributable files for a release"
+	@echo "	upload-python	- upload the Python package to the Python Package Index (pypi)"
 	@echo "	website		- create the html output of the website"
 	@echo "	website-upload	- upload the website to savannah"
 	@echo "	test		- run code style checks"
@@ -36,7 +36,7 @@ help:
 
 sign: $(RELEASE_SIGNATURE_FILE)
 
-release: $(RELEASE_ARCHIVE_FILE)
+release: $(RELEASE_ARCHIVE_FILE) $(RELEASE_DEB_FILE)
 
 build: manpages
 
@@ -59,11 +59,8 @@ $(RELEASE_ARCHIVE_FILE): Makefile
 	git tag | grep -qwF "v$(VERSION)"
 	git archive --prefix=$(RELEASE_PREFIX)-$(VERSION)/ --output=$@ v$(VERSION)
 
-$(RELEASE_DEB_FILE): Makefile dist-deb
-	mv "$(DIR_DEBIAN_BUILD)/$(notdir $@)" "$@"
-
-pypi-upload: sign release
-	$(SETUPTOOLS) sdist upload
+$(RELEASE_DEB_FILE): Makefile dist-deb $(DIR_DEBIAN_BUILD)/$(notdir $@)
+	cp "$(DIR_DEBIAN_BUILD)/$(notdir $@)" "$@"
 
 website:
 	$(MAKE) -C website html

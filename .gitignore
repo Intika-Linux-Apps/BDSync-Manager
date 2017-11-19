@@ -2,8 +2,8 @@
 *.pyc
 .pybuild/
 bdsync_manager.egg-info/
-dist/
 build/
+dist/
 website/output
 
 debian/debhelper-*-stamp
